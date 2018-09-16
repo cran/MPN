@@ -1,0 +1,15 @@
+ee8e33184f91a424aeb627b4618b81b7 *DESCRIPTION
+1f6d7418ff44f28c2552252e690b5cf0 *NAMESPACE
+3ba1c1a49560b4bdb210228aa3cb6853 *R/MPN.R
+17aa5da95dfd9847cddbf4ebf391242f *R/checkInputs.R
+6281792d8bc2c25cd820d6fdc5aa8e39 *R/f_mpn.R
+09b4549e58386465940b2f0c38a22009 *R/helpers.R
+c14e3bdd6791db0456c4c1273089aa0f *build/vignette.rds
+8d73127d11b2f6b5b090971c2cd3aee2 *inst/doc/MPN-vignette.R
+a29dc24dc45b1d97318d98a78a9a8797 *inst/doc/MPN-vignette.Rmd
+14cab12ad3e821067833e3cc66c6243e *inst/doc/MPN-vignette.html
+ad13df01f24e9752e186ac48852e64d5 *man/mpn.Rd
+ec9906b212fa42f1255bf098a943c5df *tests/testthat.R
+463e170fddaea75768f5f8ec1a96db9b *tests/testthat/test_mpn.R
+d25f6948565810ae3f99f06472a9e0eb *tests/testthat/test_mpn_inputs.R
+a29dc24dc45b1d97318d98a78a9a8797 *vignettes/MPN-vignette.Rmd

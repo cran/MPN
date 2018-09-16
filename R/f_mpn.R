@@ -1,0 +1,174 @@
+#' Calculate most probable number
+#'
+#' \code{mpn} calculates the Most Probable Number (\emph{MPN}) for microbial
+#' concentrations in serial dilutions of laboratory samples. \code{mpn}
+#' calculates variance, variance of the natural log, and confidence interval for
+#' \emph{MPN} using the approaches described in Jarvis et al. (2010). Also
+#' calculates Blodgett's (2002, 2005, 2010) Rarity Index (\emph{RI}).
+#'
+#' @param positive A vector of number of positive tubes at each dilution level.
+#' @param tubes A vector of total number of tubes at each dilution level.
+#' @param amount A vector of the amount of inoculum per tube at each dilution
+#'   level. See \emph{Details} section.
+#' @param conf_level A scalar value for the confidence level of the CI.
+#'
+#' @return A list containing:
+#'   \itemize{
+#'     \item{\strong{MPN}: }{The most probable number estimate for microbial
+#'       density (concentration).}
+#'     \item{\strong{variance}: }{The estimated variance (see Jarvis et al.) of
+#'       the\emph{MPN} estimate. If all tubes are positive or all negative,
+#'       \code{variance} will be \code{NA}.}
+#'     \item{\strong{var_log}: }{The estimated variance of the natural log of
+#'       the MPN estimate (see Jarvis et al.) using the Delta Method. If all
+#'       tubes are positive or all negative, \code{var_log} will be \code{NA}.}
+#'     \item{\strong{conf_level}: }{The confidence level used.}
+#'     \item{\strong{LB}: }{The lower bound of the confidence interval.}
+#'     \item{\strong{UB}: }{The upper bound of the confidence interval.}
+#'     \item{\strong{RI}: }{The rarity index.}
+#'   }
+#'
+#' @details As an example, assume we start with 3g of undiluted inoculum per
+#'   tube, then use a 10-fold dilution for 2 dilutions. We now have
+#'   \code{amount = 3 * c(1, .1, .01)}.
+#'
+#' @details When all tubes are negative, the point estimate of \emph{MPN} is
+#'   zero (same approach as Jarvis et al.). The point estimate for the BAM
+#'   tables "is listed as less than the lowest MPN for an outcome with at least
+#'   one positive tube" (App.2).
+#'
+#' @details When all tubes are positive, the point estimate for \emph{MPN} is
+#'   \code{Inf} (same approach as Jarvis et al.) since no finite maximum
+#'   likelihood estimate (MLE) exists. The BAM tables "list the MPN for this
+#'   outcome as greater than the highest MPN for an outcome with at least one
+#'   negative tube" (App.2). Here, the difference is probably trivial since the
+#'   sample should be further diluted if all tubes test positive.
+#'
+#' @details Currently, confidence intervals can only be calculated using
+#'   Jarvis' approach. The BAM tables use an alternate approach. We slightly
+#'   modified Jarvis' approach when all tubes are positive or all are negative;
+#'   we use \eqn{\alpha} instead of \eqn{\alpha / 2} since these are one-sided
+#'   intervals.
+#'
+#' @details If the Rarity Index is less than \code{1e-04}, the experimental
+#'   results are highly improbable. The researcher may consider running the
+#'   experiment again and/or changing the dilution levels.
+#'
+#' @section Warnings:
+#'   The assumptions of approximate normality (Delta Method and asymptotic
+#'   normality of maximum likelihood estimators) depend on large-sample theory.
+#'   Therefore, the Jarvis confidence interval approach might not work well with
+#'   small samples.
+#'
+#' @examples
+#' # Compare MPN, 95% CI, and RI to Jarvis -------------------------------------
+#'
+#' # Table 1
+#' mpn(positive = c(3, 1, 1), tubes = c(3, 3, 3), amount = c(1, .1, .01))
+#'   #Jarvis: 7.5 (1.9, 30) RI = .209
+#'
+#' mpn(positive = c(2, 2, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01))
+#'   #Jarvis: 2.1 (0.71, 6.2), RI = .069
+#'
+#' mpn(positive = c(0, 0, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01))
+#'   #Jarvis: 0 (0, 1.1) RI = 1
+#' mpn(positive = c(0, 0, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01),
+#'     conf_level = .975)$UB  #alpha / 2
+#'
+#' mpn(positive = c(3, 3, 3), tubes = c(3, 3, 3), amount = c(1, .1, .01))
+#'   #Jarvis: Inf (36, Inf) RI = 1
+#' mpn(positive = c(3, 3, 3), tubes = c(3, 3, 3), amount = c(1, .1, .01),
+#'     conf_level = .975)$LB  #alpha / 2
+#'
+#' # Table 2
+#' mpn(positive = c(20, 14, 3), tubes = c(20, 20, 20), amount = c(1, .1, .01))
+#'   #Jarvis: 13 (7.6, 21) RI = 0.794
+#'
+#' mpn(positive = c(50, 35, 7), tubes = c(50, 50, 50),
+#'     amount = 2 * c(1, .1, .01))
+#'   #Jarvis: 6.3 (4.5, 8.7) RI = .806
+#'
+#' mpn(positive = c(0, 5, 1, 0), tubes = c(1, 10, 10, 10),
+#'     amount = c(10, 1, .1, .01))
+#'   #Jarvis: 0.33 (0.14, 0.74) RI = .004
+#'
+#' mpn(positive = c(1, 5, 3, 1, 1), tubes = c(1, 5, 5, 5, 5),
+#'     amount = c(5, 1, .5, .1, .05))
+#'   #Jarvis: 2.7 (1.3, 5.5) RI = .512
+#'
+#' # Compare MPN and 95% CI to BAM tables --------------------------------------
+#'
+#' # Table 1
+#' mpn(positive = c(0, 0, 0), tubes = c(3, 3, 3), amount = c(.1, .01, .001))
+#'   #BAM: <3.0 (-, 9.5)
+#'
+#' mpn(positive = c(0, 0, 1), tubes = c(3, 3, 3), amount = c(.1, .01, .001))
+#'   #BAM: 3.0 (0.15, 9.6)
+#'
+#' mpn(positive = c(2, 2, 0), tubes = c(3, 3, 3), amount = c(.1, .01, .001))
+#'   #BAM: 21 (4.5, 42)
+#'
+#' mpn(positive = c(3, 3, 3), tubes = c(3, 3, 3), amount = c(.1, .01, .001))
+#'   #BAM: >1100 (420, -)
+#' mpn(positive = c(3, 3, 2), tubes = c(3, 3, 3), amount = c(.1, .01, .001))$MPN
+#'
+#'
+#' # Table 2
+#' mpn(positive = c(0, 0, 0), tubes = c(5, 5, 5), amount = c(.1, .01, .001))
+#'   #BAM: <1.8 (-, 6.8)
+#' mpn(positive = c(0, 0, 1), tubes = c(5, 5, 5), amount = c(.1, .01, .001))$MPN
+#'
+#' mpn(positive = c(4, 0, 2), tubes = c(5, 5, 5), amount = c(.1, .01, .001))
+#'   #BAM: 21 (6.8, 40)
+#'
+#' mpn(positive = c(5, 5, 5), tubes = c(5, 5, 5), amount = c(.1, .01, .001))
+#'   #BAM: >1600 (700, -)
+#' mpn(positive = c(5, 5, 4), tubes = c(5, 5, 5), amount = c(.1, .01, .001))$MPN
+#'
+#' @references Bacteriological Analytical Manual, 8th Edition, Appendix 2,
+#'   \url{https://www.fda.gov/Food/FoodScienceResearch/LaboratoryMethods/ucm109656.htm}
+#'
+#' @references Blodgett RJ (2002). "Measuring improbability of outcomes from a
+#'   serial dilution test." \emph{Communications in Statistics: Theory and
+#'   Methods}, 31(12), 2209-2223. \url{https://doi.org/10.1081/STA-120017222}
+#'
+#' @references Blodgett RJ (2005). "Serial dilution with a confirmation step."
+#'   \emph{Food Microbiology}, 22(6), 547-552.
+#'   \url{https://doi.org/10.1016/j.fm.2004.11.017}
+#'
+#' @references Blodgett RJ (2010). "Does a serial dilution experiment's model
+#'   agree with its outcome?" \emph{Model Assisted Statistics and Applications},
+#'   5(3), 209-215. \url{https://doi.org/10.3233/MAS-2010-0157}
+#'
+#' @references Jarvis B, Wilrich C, Wilrich P-T (2010). "Reconsideration of the
+#'   derivation of Most Probable Numbers, their standard deviations, confidence
+#'   bounds and rarity values." \emph{Journal of Applied Microbiology}, 109,
+#'   1660-1667. \url{https://doi.org/10.1111/j.1365-2672.2010.04792.x}
+#'
+#' @seealso Shiny app:  \url{https://mpncalc.galaxytrakr.org/}
+#' @keywords MPN
+#' @importFrom stats uniroot
+#' @importFrom stats dbinom
+#' @importFrom stats qnorm
+#' @export
+
+mpn <- function(positive, tubes, amount, conf_level = 0.95) {
+
+  .checkInputs_mpn(positive, tubes, amount, conf_level)
+
+  MPN <- .ptEstimate(positive, tubes, amount)
+
+  variance   <- NA
+  var_logMPN <- NA
+  sig_level  <- 1 - conf_level
+  jarvis     <- .jarvisCI(MPN, positive, tubes, amount, sig_level)
+  variance   <- jarvis$variance
+  var_logMPN <- jarvis$var_logMPN
+  LB <- jarvis$LB
+  UB <- jarvis$UB
+
+  rarity <- .rarity(MPN, positive, tubes, amount)
+
+  list(MPN = MPN, variance = variance, var_log = var_logMPN,
+       conf_level = conf_level, LB = LB, UB = UB, RI = rarity)
+}
