@@ -1,28 +1,34 @@
-#' Calculate most probable number
+#' Calculate most probable number (MPN) for serial dilutions
 #'
-#' \code{mpn} calculates the Most Probable Number (\emph{MPN}) for microbial
-#' concentrations in serial dilutions of laboratory samples. \code{mpn}
-#' calculates variance, variance of the natural log, and confidence interval for
-#' \emph{MPN} using the approaches described in Jarvis et al. (2010). Also
-#' calculates Blodgett's (2002, 2005, 2010) Rarity Index (\emph{RI}).
+#' \code{mpn} calculates the Most Probable Number (\emph{MPN}) point estimate
+#' and confidence interval for microbial concentrations in serial dilutions.
+#' Also calculates Blodgett's (2002, 2005, 2010) Rarity Index (\emph{RI}).
 #'
 #' @param positive A vector of number of positive tubes at each dilution level.
 #' @param tubes A vector of total number of tubes at each dilution level.
 #' @param amount A vector of the amount of inoculum per tube at each dilution
 #'   level. See \emph{Details} section.
 #' @param conf_level A scalar value for the confidence level of the CI.
+#' @param CI_method The method used for calculating the confidence interval.
+#'   Choices are \code{"Jarvis"} or \code{"LR"} (likelihood ratio). See
+#'   \emph{Details} section.
 #'
 #' @return A list containing:
 #'   \itemize{
-#'     \item{\strong{MPN}: }{The most probable number estimate for microbial
-#'       density (concentration).}
+#'     \item{\strong{MPN}: }{The most probable number point estimate for
+#'       microbial density (concentration).}
 #'     \item{\strong{variance}: }{The estimated variance (see Jarvis et al.) of
-#'       the\emph{MPN} estimate. If all tubes are positive or all negative,
-#'       \code{variance} will be \code{NA}.}
+#'       the \emph{MPN} estimate if \code{CI_method = "Jarvis"}. If all tubes
+#'       are positive or all negative, \code{variance} will be \code{NA}. If
+#'       \code{CI_method} is not \code{"Jarvis"}, \code{variance} will be
+#'       \code{NA}.}
 #'     \item{\strong{var_log}: }{The estimated variance of the natural log of
 #'       the MPN estimate (see Jarvis et al.) using the Delta Method. If all
-#'       tubes are positive or all negative, \code{var_log} will be \code{NA}.}
+#'       tubes are positive or all negative, \code{var_log} will be \code{NA}.
+#'       If \code{CI_method} is not \code{"Jarvis"}, \code{var_log} will be
+#'       \code{NA}.}
 #'     \item{\strong{conf_level}: }{The confidence level used.}
+#'     \item{\strong{CI_method}: }{The confidence interval method used.}
 #'     \item{\strong{LB}: }{The lower bound of the confidence interval.}
 #'     \item{\strong{UB}: }{The upper bound of the confidence interval.}
 #'     \item{\strong{RI}: }{The rarity index.}
@@ -44,21 +50,24 @@
 #'   negative tube" (App.2). Here, the difference is probably trivial since the
 #'   sample should be further diluted if all tubes test positive.
 #'
-#' @details Currently, confidence intervals can only be calculated using
-#'   Jarvis' approach. The BAM tables use an alternate approach. We slightly
-#'   modified Jarvis' approach when all tubes are positive or all are negative;
-#'   we use \eqn{\alpha} instead of \eqn{\alpha / 2} since these are one-sided
-#'   intervals.
+#' @details Currently, confidence intervals can only be calculated using the
+#'   Jarvis (2010) or likelihood ratio (LR) approach (Ridout, 1994). The BAM
+#'   tables use an alternate approach. We slightly modified Jarvis' approach
+#'   when all tubes are positive or all are negative; we use \eqn{\alpha}
+#'   instead of \eqn{\alpha / 2} since these are one-sided intervals. The Ridout
+#'   (1994) LR approach uses the same technique (with \eqn{\alpha}) for these
+#'   two extreme cases.
 #'
 #' @details If the Rarity Index is less than \code{1e-04}, the experimental
 #'   results are highly improbable. The researcher may consider running the
 #'   experiment again and/or changing the dilution levels.
 #'
 #' @section Warnings:
-#'   The assumptions of approximate normality (Delta Method and asymptotic
-#'   normality of maximum likelihood estimators) depend on large-sample theory.
-#'   Therefore, the Jarvis confidence interval approach might not work well with
-#'   small samples.
+#'   The Jarvis confidence interval assumptions of approximate normality (Delta
+#'   Method and asymptotic normality of maximum likelihood estimators) depend on
+#'   large-sample theory. The likelihood ratio assumptions also depend on
+#'   large-sample theory. Therefore, the Jarvis and LR confidence interval
+#'   approaches work best with larger experiments.
 #'
 #' @examples
 #' # Compare MPN, 95% CI, and RI to Jarvis -------------------------------------
@@ -125,12 +134,26 @@
 #'   #BAM: >1600 (700, -)
 #' mpn(positive = c(5, 5, 4), tubes = c(5, 5, 5), amount = c(.1, .01, .001))$MPN
 #'
+#' # Compare MPN and 95% LR CI to Ridout (1994) --------------------------------
+#'
+#' # Table 1
+#' mpn(positive = c(0, 0, 0), tubes = c(3, 3, 3), amount = c(.1, .01, .001),
+#'     CI_method = "LR")
+#'   #Ridout: 0 (0, 9.0)
+#' mpn(positive = c(2, 2, 0), tubes = c(3, 3, 3), amount = c(.1, .01, .001),
+#'     CI_method = "LR")
+#'   #Ridout: 21.1 (6.2, 54.3)
+#' mpn(positive = c(3, 3, 3), tubes = c(3, 3, 3), amount = c(.1, .01, .001),
+#'     CI_method = "LR")
+#'   #Ridout: Inf (465.1, Inf)
+#'
 #' @references Bacteriological Analytical Manual, 8th Edition, Appendix 2,
 #'   \url{https://www.fda.gov/Food/FoodScienceResearch/LaboratoryMethods/ucm109656.htm}
 #'
 #' @references Blodgett RJ (2002). "Measuring improbability of outcomes from a
 #'   serial dilution test." \emph{Communications in Statistics: Theory and
-#'   Methods}, 31(12), 2209-2223. \url{https://doi.org/10.1081/STA-120017222}
+#'   Methods}, 31(12), 2209-2223.
+#'   \url{https://www.tandfonline.com/doi/abs/10.1081/STA-120017222}
 #'
 #' @references Blodgett RJ (2005). "Serial dilution with a confirmation step."
 #'   \emph{Food Microbiology}, 22(6), 547-552.
@@ -140,35 +163,54 @@
 #'   agree with its outcome?" \emph{Model Assisted Statistics and Applications},
 #'   5(3), 209-215. \url{https://doi.org/10.3233/MAS-2010-0157}
 #'
+#' @references Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk
+#'   assessment, Second Ed." \emph{John Wiley & Sons, Inc.},
+#'   ISBN 978-1-118-14529-6.
+#'
 #' @references Jarvis B, Wilrich C, Wilrich P-T (2010). "Reconsideration of the
 #'   derivation of Most Probable Numbers, their standard deviations, confidence
 #'   bounds and rarity values." \emph{Journal of Applied Microbiology}, 109,
 #'   1660-1667. \url{https://doi.org/10.1111/j.1365-2672.2010.04792.x}
+#'
+#' @references Ridout MS (1994). "A Comparison of Confidence Interval Methods
+#'   for Dilution Series Experiments." \emph{Biometrics}, 50(1), 289-296.
 #'
 #' @seealso Shiny app:  \url{https://mpncalc.galaxytrakr.org/}
 #' @keywords MPN
 #' @importFrom stats uniroot
 #' @importFrom stats dbinom
 #' @importFrom stats qnorm
+#' @importFrom stats qchisq
 #' @export
 
-mpn <- function(positive, tubes, amount, conf_level = 0.95) {
+mpn <- function(positive, tubes, amount, conf_level = 0.95,
+                CI_method = c("Jarvis", "LR")) {
 
   .checkInputs_mpn(positive, tubes, amount, conf_level)
+  CI_method <- match.arg(CI_method)
 
   MPN <- .ptEstimate(positive, tubes, amount)
 
   variance   <- NA
   var_logMPN <- NA
   sig_level  <- 1 - conf_level
-  jarvis     <- .jarvisCI(MPN, positive, tubes, amount, sig_level)
-  variance   <- jarvis$variance
-  var_logMPN <- jarvis$var_logMPN
-  LB <- jarvis$LB
-  UB <- jarvis$UB
+  if (CI_method == "Jarvis") {
+    jarvis     <- .jarvisCI(MPN = MPN, positive = positive, tubes = tubes,
+                            amount = amount, sig_level = sig_level)
+    variance   <- jarvis$variance
+    var_logMPN <- jarvis$var_logMPN
+    LB <- jarvis$LB
+    UB <- jarvis$UB
+  } else {
+    like_ratio <- .likeRatioCI(MPN = MPN, positive = positive, tubes = tubes,
+                                amount = amount, sig_level = sig_level)
+    LB <- like_ratio$LB
+    UB <- like_ratio$UB
+  }
 
   rarity <- .rarity(MPN, positive, tubes, amount)
 
   list(MPN = MPN, variance = variance, var_log = var_logMPN,
-       conf_level = conf_level, LB = LB, UB = UB, RI = rarity)
+       conf_level = conf_level, CI_method = CI_method, LB = LB, UB = UB,
+       RI = rarity)
 }

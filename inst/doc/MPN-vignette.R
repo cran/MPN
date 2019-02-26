@@ -42,3 +42,10 @@ plot(lambda, L_all_pos, type = "l", xlim = c(0, 100), ylim = c(0, 1.1),
      ylab = "Likelihood", main = "All Positives")
 abline(h = 1, lty = 2)
 
+## ----Calculate confidence intervals--------------------------------------
+my_positive <- c(1, 1, 1)
+my_tubes    <- c(3, 3, 3)
+my_amount   <- 10 * c(1, .1, .01)
+mpn(my_positive, my_tubes, my_amount)  #Jarvis approach
+mpn(my_positive, my_tubes, my_amount, CI_method = "LR")  #likelihood ratio
+

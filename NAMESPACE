@@ -2,5 +2,6 @@
 
 export(mpn)
 importFrom(stats,dbinom)
+importFrom(stats,qchisq)
 importFrom(stats,qnorm)
 importFrom(stats,uniroot)
