@@ -1,3 +1,12 @@
+MPN v0.3.0
+============
+
+Changes:
+
+* Added the apc() function to estimate Aerobic Plate Counts (APC).
+* Added a bias-adjusted point estimate to the mpn() output.
+
+
 MPN v0.2.0
 ============
 

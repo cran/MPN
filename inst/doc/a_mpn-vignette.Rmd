@@ -15,11 +15,8 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ## Introduction
 
-The **MPN** package computes the Most Probable Number, i.e. microbial density,
-derived from serial dilutions.
-
-The user inputs the number of dilutions, number of tubes, number of positive
-tubes, amount of inocula, confidence level, and confidence interval method.
+The **MPN** package computes the Most Probable Number (i.e. microbial density)
+and other microbial enumeration metrics derived from serial dilutions.
 
 
 ## `mpn()`
@@ -32,6 +29,9 @@ tubes, amount of inocula, confidence level, and confidence interval method.
 [4](https://doi.org/10.3233/MAS-2010-0157)
 ) Rarity Index (*RI*).
 
+The user inputs the number of dilutions, number of tubes, number of positive
+tubes, amount of inocula, confidence level, and confidence interval method.
+
 
 ## Maximum Likelihood Estimation
 
@@ -40,7 +40,7 @@ Combining the notaton of Blodgett (
 [2](https://www.tandfonline.com/doi/abs/10.1081/STA-120017222)
 )
 and Jarvis et al. (
-[6](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
+[7](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
 ), we write the likelihood function as:
 
 $$L = L(\lambda; x_i, n_i, z_i, i = 1,...,k)
@@ -67,14 +67,13 @@ L <- function(lambda, positive, tubes, amount) {
 L_vec <- Vectorize(L, "lambda")
 ```
 
-As is typical of maximum likelihood approaches, the **MPN** package uses the
-score function (derivative of the log-likelihood) to solve for $\hat{\lambda}$,
-the maximum likelihood estimate (MLE) of $\lambda$ (i.e., the point estimate of
-*MPN*). However, let's demonstrate what is happening in terms of the likelihood
-function itself. Assume we have 10g of undiluted inoculum in each of 3 tubes.
-Now we use a 10-fold dilution twice (i.e., the relative dilution levels are 1,
-.1, .01). Also assume that exactly 1 of the 3 tubes is positive at each dilution
-level:
+As is typical of maximum likelihood approaches, `mpn()` uses the score function
+(derivative of the log-likelihood) to solve for $\hat{\lambda}$, the maximum
+likelihood estimate (MLE) of $\lambda$ (i.e., the point estimate of *MPN*).
+However, let's demonstrate what is happening in terms of the likelihood function
+itself. Assume we have 10g of undiluted inoculum in each of 3 tubes. Now we use
+a 10-fold dilution twice (i.e., the relative dilution levels are 1, .1, .01).
+Also assume that exactly 1 of the 3 tubes is positive at each dilution level:
 
 ```{r Calculate MPN estimate}
 #MPN calculation
@@ -123,14 +122,24 @@ From a practical perspective, if all the tubes are positive, then the scientist
 should probably further dilute the sample until some tubes are negative.
 
 
+## Bias Adjustment
+`mpn()` also returns a bias-adjusted version (*9*, *5*, *6*) of the point
+estimate:
+
+```{r Bias adjustment}
+my_mpn$MPN
+my_mpn$MPN_adj
+```
+
+
 ## Confidence Intervals
 
 As discussed in the references, many different confidence intervals (CIs) can be
-calculated for the Most Probable Number. Currently, the **MPN** package computes
-a CI using the approach of Jarvis et al.
+calculated for the Most Probable Number. Currently, `mpn()` computes a CI using
+the approach of Jarvis et al.
 (
-[6](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
-) or the likelihood ratio approach of Ridout (*7*).
+[7](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
+) or the likelihood ratio approach of Ridout (*8*).
 However, since these approaches rely on large-sample theory, the results are
 more reliable for larger experiments.
 
@@ -146,7 +155,7 @@ mpn(my_positive, my_tubes, my_amount, CI_method = "LR")  #likelihood ratio
 ## Rarity Index
 
 As Jarvis (
-[6](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
+[7](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
 ) explains, Blodgett's
 (
 [2](https://www.tandfonline.com/doi/abs/10.1081/STA-120017222),
@@ -163,10 +172,11 @@ small are unlikely; therefore, the results should be regarded with suspicion.
 
 ## Conclusion
 
-The **MPN** package is more versatile than static tables in that the number of
-tubes can vary across dilution levels, the user can choose any number (or
-levels) of dilutions, and the confidence level can be changed. Also, the Rarity
-Index, which quantifies the validity of the results, is included.
+The **MPN** package is more versatile than static Most Probable Number tables in
+that the number of tubes can vary across dilution levels, the user can choose
+any number (or levels) of dilutions, and the confidence level can be changed.
+Also, the Rarity Index, which quantifies the validity of the results, is
+included.
 
 
 ---------
@@ -189,13 +199,20 @@ dilution test." *Communications in Statistics: Theory and Methods*, 31(12),
 outcome?" *Model Assisted Statistics and Applications*, 5(3), 209-215.
 <https://doi.org/10.3233/MAS-2010-0157>
 
-5. Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk assessment,
+5. Haas CN (1989). "Estimation of microbial densities from dilution
+count experiments" *Applied and Environmental Microbiology* 55(8), 1934-1942.
+
+6. Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk assessment,
 Second Ed." *John Wiley & Sons, Inc.*, ISBN 978-1-118-14529-6.
 
-6. Jarvis B, Wilrich C, Wilrich P-T (2010). "Reconsideration of the derivation
+7. Jarvis B, Wilrich C, Wilrich P-T (2010). "Reconsideration of the derivation
 of Most Probable Numbers, their standard deviations, confidence bounds and
 rarity values." *Journal of Applied Microbiology*, 109, 1660-1667.
 <https://doi.org/10.1111/j.1365-2672.2010.04792.x>
 
-7. Ridout MS (1994). "A Comparison of Confidence Interval Methods for Dilution
+8. Ridout MS (1994). "A Comparison of Confidence Interval Methods for Dilution
 Series Experiments." *Biometrics*, 50(1), 289-296.
+
+9. Salama IA, Koch GG, Tolley DH (1978). "On the estimation of the
+most probable number in a serial dilution technique." *Communications in
+Statistics - Theory and Methods*, 7(13), 1267-1281.

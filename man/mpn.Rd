@@ -2,7 +2,7 @@
 % Please edit documentation in R/f_mpn.R
 \name{mpn}
 \alias{mpn}
-\title{Calculate most probable number (MPN) for serial dilutions}
+\title{Calculate most probable number (MPN)}
 \usage{
 mpn(positive, tubes, amount, conf_level = 0.95, CI_method = c("Jarvis",
   "LR"))
@@ -15,7 +15,8 @@ mpn(positive, tubes, amount, conf_level = 0.95, CI_method = c("Jarvis",
 \item{amount}{A vector of the amount of inoculum per tube at each dilution
 level. See \emph{Details} section.}
 
-\item{conf_level}{A scalar value for the confidence level of the CI.}
+\item{conf_level}{A scalar value between zero and one for the confidence
+level. Typically 0.95 (i.e., a 95 percent confidence interval).}
 
 \item{CI_method}{The method used for calculating the confidence interval.
 Choices are \code{"Jarvis"} or \code{"LR"} (likelihood ratio). See
@@ -26,6 +27,7 @@ A list containing:
   \itemize{
     \item{\strong{MPN}: }{The most probable number point estimate for
       microbial density (concentration).}
+    \item{\strong{MPN_adj}: }{The bias-adjusted point estimate for MPN.}
     \item{\strong{variance}: }{The estimated variance (see Jarvis et al.) of
       the \emph{MPN} estimate if \code{CI_method = "Jarvis"}. If all tubes
       are positive or all negative, \code{variance} will be \code{NA}. If
@@ -45,8 +47,8 @@ A list containing:
 }
 \description{
 \code{mpn} calculates the Most Probable Number (\emph{MPN}) point estimate
-and confidence interval for microbial concentrations in serial dilutions.
-Also calculates Blodgett's (2002, 2005, 2010) Rarity Index (\emph{RI}).
+and confidence interval for microbial concentrations. Also calculates
+Blodgett's (2002, 2005, 2010) Rarity Index (\emph{RI}).
 }
 \details{
 As an example, assume we start with 3g of undiluted inoculum per
@@ -64,6 +66,9 @@ When all tubes are positive, the point estimate for \emph{MPN} is
   outcome as greater than the highest MPN for an outcome with at least one
   negative tube" (App.2). Here, the difference is probably trivial since the
   sample should be further diluted if all tubes test positive.
+
+The bias adjustment for the point estimate uses the method of Salama
+  et al. (1978). Also see Haas (1989).
 
 Currently, confidence intervals can only be calculated using the
   Jarvis (2010) or likelihood ratio (LR) approach (Ridout, 1994). The BAM
@@ -93,9 +98,6 @@ If the Rarity Index is less than \code{1e-04}, the experimental
 mpn(positive = c(3, 1, 1), tubes = c(3, 3, 3), amount = c(1, .1, .01))
   #Jarvis: 7.5 (1.9, 30) RI = .209
 
-mpn(positive = c(2, 2, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01))
-  #Jarvis: 2.1 (0.71, 6.2), RI = .069
-
 mpn(positive = c(0, 0, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01))
   #Jarvis: 0 (0, 1.1) RI = 1
 mpn(positive = c(0, 0, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01),
@@ -113,10 +115,6 @@ mpn(positive = c(20, 14, 3), tubes = c(20, 20, 20), amount = c(1, .1, .01))
 mpn(positive = c(50, 35, 7), tubes = c(50, 50, 50),
     amount = 2 * c(1, .1, .01))
   #Jarvis: 6.3 (4.5, 8.7) RI = .806
-
-mpn(positive = c(0, 5, 1, 0), tubes = c(1, 10, 10, 10),
-    amount = c(10, 1, .1, .01))
-  #Jarvis: 0.33 (0.14, 0.74) RI = .004
 
 mpn(positive = c(1, 5, 3, 1, 1), tubes = c(1, 5, 5, 5, 5),
     amount = c(5, 1, .5, .1, .05))
@@ -182,6 +180,10 @@ Blodgett RJ (2010). "Does a serial dilution experiment's model
   agree with its outcome?" \emph{Model Assisted Statistics and Applications},
   5(3), 209-215. \url{https://doi.org/10.3233/MAS-2010-0157}
 
+Haas CN (1989). "Estimation of microbial densities from dilution
+  count experiments" \emph{Applied and Environmental Microbiology} 55(8),
+  1934-1942.
+
 Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk
   assessment, Second Ed." \emph{John Wiley & Sons, Inc.},
   ISBN 978-1-118-14529-6.
@@ -191,10 +193,15 @@ Jarvis B, Wilrich C, Wilrich P-T (2010). "Reconsideration of the
   bounds and rarity values." \emph{Journal of Applied Microbiology}, 109,
   1660-1667. \url{https://doi.org/10.1111/j.1365-2672.2010.04792.x}
 
-Ridout MS (1994). "A Comparison of Confidence Interval Methods
-  for Dilution Series Experiments." \emph{Biometrics}, 50(1), 289-296.
+Ridout MS (1994). "A comparison of confidence interval methods
+  for dilution series experiments." \emph{Biometrics}, 50(1), 289-296.
+
+Salama IA, Koch GG, Tolley DH. (1978) "On the estimation of the
+  most probable number in a serial dilution technique." \emph{Communications
+  in Statistics - Theory and Methods}, 7(13), 1267-1281.
 }
 \seealso{
 Shiny app:  \url{https://mpncalc.galaxytrakr.org/}
+
+\code{\link{apc}} for Aerobic Plate Count
 }
-\keyword{MPN}

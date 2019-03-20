@@ -1,14 +1,15 @@
-#' Calculate most probable number (MPN) for serial dilutions
+#' Calculate most probable number (MPN)
 #'
 #' \code{mpn} calculates the Most Probable Number (\emph{MPN}) point estimate
-#' and confidence interval for microbial concentrations in serial dilutions.
-#' Also calculates Blodgett's (2002, 2005, 2010) Rarity Index (\emph{RI}).
+#' and confidence interval for microbial concentrations. Also calculates
+#' Blodgett's (2002, 2005, 2010) Rarity Index (\emph{RI}).
 #'
 #' @param positive A vector of number of positive tubes at each dilution level.
 #' @param tubes A vector of total number of tubes at each dilution level.
 #' @param amount A vector of the amount of inoculum per tube at each dilution
 #'   level. See \emph{Details} section.
-#' @param conf_level A scalar value for the confidence level of the CI.
+#' @param conf_level A scalar value between zero and one for the confidence
+#'   level. Typically 0.95 (i.e., a 95 percent confidence interval).
 #' @param CI_method The method used for calculating the confidence interval.
 #'   Choices are \code{"Jarvis"} or \code{"LR"} (likelihood ratio). See
 #'   \emph{Details} section.
@@ -17,6 +18,7 @@
 #'   \itemize{
 #'     \item{\strong{MPN}: }{The most probable number point estimate for
 #'       microbial density (concentration).}
+#'     \item{\strong{MPN_adj}: }{The bias-adjusted point estimate for MPN.}
 #'     \item{\strong{variance}: }{The estimated variance (see Jarvis et al.) of
 #'       the \emph{MPN} estimate if \code{CI_method = "Jarvis"}. If all tubes
 #'       are positive or all negative, \code{variance} will be \code{NA}. If
@@ -50,6 +52,9 @@
 #'   negative tube" (App.2). Here, the difference is probably trivial since the
 #'   sample should be further diluted if all tubes test positive.
 #'
+#' @details The bias adjustment for the point estimate uses the method of Salama
+#'   et al. (1978). Also see Haas (1989).
+#'
 #' @details Currently, confidence intervals can only be calculated using the
 #'   Jarvis (2010) or likelihood ratio (LR) approach (Ridout, 1994). The BAM
 #'   tables use an alternate approach. We slightly modified Jarvis' approach
@@ -76,9 +81,6 @@
 #' mpn(positive = c(3, 1, 1), tubes = c(3, 3, 3), amount = c(1, .1, .01))
 #'   #Jarvis: 7.5 (1.9, 30) RI = .209
 #'
-#' mpn(positive = c(2, 2, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01))
-#'   #Jarvis: 2.1 (0.71, 6.2), RI = .069
-#'
 #' mpn(positive = c(0, 0, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01))
 #'   #Jarvis: 0 (0, 1.1) RI = 1
 #' mpn(positive = c(0, 0, 0), tubes = c(3, 3, 3), amount = c(1, .1, .01),
@@ -96,10 +98,6 @@
 #' mpn(positive = c(50, 35, 7), tubes = c(50, 50, 50),
 #'     amount = 2 * c(1, .1, .01))
 #'   #Jarvis: 6.3 (4.5, 8.7) RI = .806
-#'
-#' mpn(positive = c(0, 5, 1, 0), tubes = c(1, 10, 10, 10),
-#'     amount = c(10, 1, .1, .01))
-#'   #Jarvis: 0.33 (0.14, 0.74) RI = .004
 #'
 #' mpn(positive = c(1, 5, 3, 1, 1), tubes = c(1, 5, 5, 5, 5),
 #'     amount = c(5, 1, .5, .1, .05))
@@ -163,6 +161,10 @@
 #'   agree with its outcome?" \emph{Model Assisted Statistics and Applications},
 #'   5(3), 209-215. \url{https://doi.org/10.3233/MAS-2010-0157}
 #'
+#' @references Haas CN (1989). "Estimation of microbial densities from dilution
+#'   count experiments" \emph{Applied and Environmental Microbiology} 55(8),
+#'   1934-1942.
+#'
 #' @references Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk
 #'   assessment, Second Ed." \emph{John Wiley & Sons, Inc.},
 #'   ISBN 978-1-118-14529-6.
@@ -172,11 +174,15 @@
 #'   bounds and rarity values." \emph{Journal of Applied Microbiology}, 109,
 #'   1660-1667. \url{https://doi.org/10.1111/j.1365-2672.2010.04792.x}
 #'
-#' @references Ridout MS (1994). "A Comparison of Confidence Interval Methods
-#'   for Dilution Series Experiments." \emph{Biometrics}, 50(1), 289-296.
+#' @references Ridout MS (1994). "A comparison of confidence interval methods
+#'   for dilution series experiments." \emph{Biometrics}, 50(1), 289-296.
+#'
+#' @references Salama IA, Koch GG, Tolley DH. (1978) "On the estimation of the
+#'   most probable number in a serial dilution technique." \emph{Communications
+#'   in Statistics - Theory and Methods}, 7(13), 1267-1281.
 #'
 #' @seealso Shiny app:  \url{https://mpncalc.galaxytrakr.org/}
-#' @keywords MPN
+#' @seealso \code{\link{apc}} for Aerobic Plate Count
 #' @importFrom stats uniroot
 #' @importFrom stats dbinom
 #' @importFrom stats qnorm
@@ -186,31 +192,33 @@
 mpn <- function(positive, tubes, amount, conf_level = 0.95,
                 CI_method = c("Jarvis", "LR")) {
 
-  .checkInputs_mpn(positive, tubes, amount, conf_level)
+  .checkInputs_mpn(positive = positive, tubes = tubes, amount = amount,
+                   conf_level = conf_level)
   CI_method <- match.arg(CI_method)
 
-  MPN <- .ptEstimate(positive, tubes, amount)
+  MPN <- .ptEst_MPN(positive, tubes, amount)
+  MPN_adj <- .ptEstAdj_MPN(MPN, tubes, amount)
 
   variance   <- NA
   var_logMPN <- NA
-  sig_level  <- 1 - conf_level
   if (CI_method == "Jarvis") {
-    jarvis     <- .jarvisCI(MPN = MPN, positive = positive, tubes = tubes,
-                            amount = amount, sig_level = sig_level)
+    jarvis     <- .jarvisCI_MPN(MPN = MPN, positive = positive, tubes = tubes,
+                                amount = amount, conf_level = conf_level)
     variance   <- jarvis$variance
     var_logMPN <- jarvis$var_logMPN
     LB <- jarvis$LB
     UB <- jarvis$UB
   } else {
-    like_ratio <- .likeRatioCI(MPN = MPN, positive = positive, tubes = tubes,
-                                amount = amount, sig_level = sig_level)
+    like_ratio <- .likeRatioCI_MPN(MPN = MPN, positive = positive,
+                                   tubes = tubes, amount = amount,
+                                   conf_level = conf_level)
     LB <- like_ratio$LB
     UB <- like_ratio$UB
   }
 
-  rarity <- .rarity(MPN, positive, tubes, amount)
+  rarity <- .rarity_MPN(MPN, positive, tubes, amount)
 
-  list(MPN = MPN, variance = variance, var_log = var_logMPN,
+  list(MPN = MPN, MPN_adj = MPN_adj, variance = variance, var_log = var_logMPN,
        conf_level = conf_level, CI_method = CI_method, LB = LB, UB = UB,
        RI = rarity)
 }

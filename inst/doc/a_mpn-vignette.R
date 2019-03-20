@@ -42,6 +42,10 @@ plot(lambda, L_all_pos, type = "l", xlim = c(0, 100), ylim = c(0, 1.1),
      ylab = "Likelihood", main = "All Positives")
 abline(h = 1, lty = 2)
 
+## ----Bias adjustment-----------------------------------------------------
+my_mpn$MPN
+my_mpn$MPN_adj
+
 ## ----Calculate confidence intervals--------------------------------------
 my_positive <- c(1, 1, 1)
 my_tubes    <- c(3, 3, 3)

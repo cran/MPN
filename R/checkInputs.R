@@ -41,3 +41,37 @@
     stop("more positive tubes than possible")
   }
 }
+
+.checkInputs_apc <- function(count, amount_scor, amount_tntc, tntc_limit,
+                             conf_level) {
+
+  l_count       <- length(count)
+  l_amount_scor <- length(amount_scor)
+  if (l_count != l_amount_scor) {
+    stop("'count' &  'amount_scor' must be the same length")
+  }
+  if (l_count < 1) {
+    stop("there must be at least one scorable plate")
+  }
+  if (any(is.na(count)) || any(is.na(amount_scor))) {
+    stop("missing values not allowed for 'count' or 'amount_scor'")
+  }
+  if (any(count < 0) || any(round(count) != count)) {
+    stop("'count' must contain non-negative whole numbers")
+  }
+  if (any(amount_scor <= 0)) {
+    stop("'amount_scor' must contain positive values")
+  }
+  if (!is.null(amount_tntc) && any(amount_tntc <= 0)) {
+    stop("'amount_tntc' must be NULL or contain positive values")
+  }
+  if (length(conf_level) != 1) {
+    stop("'conf_level' must have length of 1")
+  }
+  if (conf_level <= 0 || conf_level >= 1) {
+    stop("'conf_level' must be between 0 & 1")
+  }
+  if (sum(count) == 0 && length(amount_tntc) != 0) {
+    stop("if all scorable counts are zero, there should not be any TNTC plates")
+  }
+}

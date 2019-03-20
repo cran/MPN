@@ -12,7 +12,7 @@
 
 <meta name="author" content="Martine Ferguson &amp; John Ihrie" />
 
-<meta name="date" content="2019-02-26" />
+<meta name="date" content="2019-03-20" />
 
 <title>MPN: Most Probable Number for Serial Dilutions</title>
 
@@ -92,22 +92,22 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">MPN: Most Probable Number for Serial Dilutions</h1>
 <h4 class="author"><em>Martine Ferguson &amp; John Ihrie</em></h4>
-<h4 class="date"><em>2019-02-26</em></h4>
+<h4 class="date"><em>2019-03-20</em></h4>
 
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The <strong>MPN</strong> package computes the Most Probable Number, i.e. microbial density, derived from serial dilutions.</p>
-<p>The user inputs the number of dilutions, number of tubes, number of positive tubes, amount of inocula, confidence level, and confidence interval method.</p>
+<p>The <strong>MPN</strong> package computes the Most Probable Number (i.e. microbial density) and other microbial enumeration metrics derived from serial dilutions.</p>
 </div>
 <div id="mpn" class="section level2">
 <h2><code>mpn()</code></h2>
 <p><strong>MPN</strong> includes the <code>mpn()</code> function to estimate the Most Probable Number (<em>MPN</em>), its variance and confidence interval, and Blodgett’s ( <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222">2</a>, <a href="https://doi.org/10.1016/j.fm.2004.11.017">3</a>, <a href="https://doi.org/10.3233/MAS-2010-0157">4</a> ) Rarity Index (<em>RI</em>).</p>
+<p>The user inputs the number of dilutions, number of tubes, number of positive tubes, amount of inocula, confidence level, and confidence interval method.</p>
 </div>
 <div id="maximum-likelihood-estimation" class="section level2">
 <h2>Maximum Likelihood Estimation</h2>
-<p>As discussed in the references, <em>MPN</em> is estimated by maximizing likelihood. Combining the notaton of Blodgett ( <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222">2</a> ) and Jarvis et al. ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">6</a> ), we write the likelihood function as:</p>
+<p>As discussed in the references, <em>MPN</em> is estimated by maximizing likelihood. Combining the notaton of Blodgett ( <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222">2</a> ) and Jarvis et al. ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">7</a> ), we write the likelihood function as:</p>
 <p><span class="math display">\[L = L(\lambda; x_i, n_i, z_i, i = 1,...,k)
     = \prod_{i=1}^k \binom{n_i}{x_i} {(1-exp(-{\lambda}{z_i}))} ^ {x_i}
     {(exp(-{\lambda}{z_i}))} ^ {n_i-x_i}\]</span></p>
@@ -127,7 +127,7 @@ L &lt;-<span class="st"> </span><span class="cf">function</span>(lambda, positiv
   <span class="kw">prod</span>(binom_coef <span class="op">*</span><span class="st"> </span>((<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>exp_term) <span class="op">^</span><span class="st"> </span>positive) <span class="op">*</span><span class="st"> </span>exp_term <span class="op">^</span><span class="st"> </span>(tubes <span class="op">-</span><span class="st"> </span>positive))
 }
 L_vec &lt;-<span class="st"> </span><span class="kw">Vectorize</span>(L, <span class="st">&quot;lambda&quot;</span>)</code></pre></div>
-<p>As is typical of maximum likelihood approaches, the <strong>MPN</strong> package uses the score function (derivative of the log-likelihood) to solve for <span class="math inline">\(\hat{\lambda}\)</span>, the maximum likelihood estimate (MLE) of <span class="math inline">\(\lambda\)</span> (i.e., the point estimate of <em>MPN</em>). However, let’s demonstrate what is happening in terms of the likelihood function itself. Assume we have 10g of undiluted inoculum in each of 3 tubes. Now we use a 10-fold dilution twice (i.e., the relative dilution levels are 1, .1, .01). Also assume that exactly 1 of the 3 tubes is positive at each dilution level:</p>
+<p>As is typical of maximum likelihood approaches, <code>mpn()</code> uses the score function (derivative of the log-likelihood) to solve for <span class="math inline">\(\hat{\lambda}\)</span>, the maximum likelihood estimate (MLE) of <span class="math inline">\(\lambda\)</span> (i.e., the point estimate of <em>MPN</em>). However, let’s demonstrate what is happening in terms of the likelihood function itself. Assume we have 10g of undiluted inoculum in each of 3 tubes. Now we use a 10-fold dilution twice (i.e., the relative dilution levels are 1, .1, .01). Also assume that exactly 1 of the 3 tubes is positive at each dilution level:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#MPN calculation</span>
 <span class="kw">library</span>(MPN)
 my_positive &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>) <span class="co">#xi</span>
@@ -136,6 +136,9 @@ my_amount   &lt;-<span class="st"> </span><span class="dv">10</span> <span class
 (my_mpn &lt;-<span class="st"> </span><span class="kw">mpn</span>(my_positive, my_tubes, my_amount))
 <span class="co">#&gt; $MPN</span>
 <span class="co">#&gt; [1] 0.1118076</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $MPN_adj</span>
+<span class="co">#&gt; [1] 0.08724619</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $variance</span>
 <span class="co">#&gt; [1] 0.004309218</span>
@@ -186,15 +189,26 @@ L_all_pos &lt;-<span class="st"> </span><span class="kw">L_vec</span>(lambda, al
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>From a practical perspective, if all the tubes are positive, then the scientist should probably further dilute the sample until some tubes are negative.</p>
 </div>
+<div id="bias-adjustment" class="section level2">
+<h2>Bias Adjustment</h2>
+<p><code>mpn()</code> also returns a bias-adjusted version (<em>9</em>, <em>5</em>, <em>6</em>) of the point estimate:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_mpn<span class="op">$</span>MPN
+<span class="co">#&gt; [1] 0.1118076</span>
+my_mpn<span class="op">$</span>MPN_adj
+<span class="co">#&gt; [1] 0.08724619</span></code></pre></div>
+</div>
 <div id="confidence-intervals" class="section level2">
 <h2>Confidence Intervals</h2>
-<p>As discussed in the references, many different confidence intervals (CIs) can be calculated for the Most Probable Number. Currently, the <strong>MPN</strong> package computes a CI using the approach of Jarvis et al. ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">6</a> ) or the likelihood ratio approach of Ridout (<em>7</em>). However, since these approaches rely on large-sample theory, the results are more reliable for larger experiments.</p>
+<p>As discussed in the references, many different confidence intervals (CIs) can be calculated for the Most Probable Number. Currently, <code>mpn()</code> computes a CI using the approach of Jarvis et al. ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">7</a> ) or the likelihood ratio approach of Ridout (<em>8</em>). However, since these approaches rely on large-sample theory, the results are more reliable for larger experiments.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_positive &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>)
 my_tubes    &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>)
 my_amount   &lt;-<span class="st"> </span><span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, .<span class="dv">1</span>, .<span class="dv">01</span>)
 <span class="kw">mpn</span>(my_positive, my_tubes, my_amount)  <span class="co">#Jarvis approach</span>
 <span class="co">#&gt; $MPN</span>
 <span class="co">#&gt; [1] 0.1118076</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $MPN_adj</span>
+<span class="co">#&gt; [1] 0.08724619</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $variance</span>
 <span class="co">#&gt; [1] 0.004309218</span>
@@ -220,6 +234,9 @@ my_amount   &lt;-<span class="st"> </span><span class="dv">10</span> <span class
 <span class="co">#&gt; $MPN</span>
 <span class="co">#&gt; [1] 0.1118076</span>
 <span class="co">#&gt; </span>
+<span class="co">#&gt; $MPN_adj</span>
+<span class="co">#&gt; [1] 0.08724619</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; $variance</span>
 <span class="co">#&gt; [1] NA</span>
 <span class="co">#&gt; </span>
@@ -243,11 +260,11 @@ my_amount   &lt;-<span class="st"> </span><span class="dv">10</span> <span class
 </div>
 <div id="rarity-index" class="section level2">
 <h2>Rarity Index</h2>
-<p>As Jarvis ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">6</a> ) explains, Blodgett’s ( <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222">2</a>, <a href="https://doi.org/10.1016/j.fm.2004.11.017">3</a>, <a href="https://doi.org/10.3233/MAS-2010-0157">4</a> ) Rarity Index is a ratio of two likelihoods. The likelihood in the numerator is for the actual results (i.e., evaluated at the <em>MPN</em> point estimate). The likelihood in the denominator is for the (hypothetical) results that would have given the largest possible likelihood. So <em>RI</em> is larger than 0 and at most 1. Values of <em>RI</em> that are very small are unlikely; therefore, the results should be regarded with suspicion.</p>
+<p>As Jarvis ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">7</a> ) explains, Blodgett’s ( <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222">2</a>, <a href="https://doi.org/10.1016/j.fm.2004.11.017">3</a>, <a href="https://doi.org/10.3233/MAS-2010-0157">4</a> ) Rarity Index is a ratio of two likelihoods. The likelihood in the numerator is for the actual results (i.e., evaluated at the <em>MPN</em> point estimate). The likelihood in the denominator is for the (hypothetical) results that would have given the largest possible likelihood. So <em>RI</em> is larger than 0 and at most 1. Values of <em>RI</em> that are very small are unlikely; therefore, the results should be regarded with suspicion.</p>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<p>The <strong>MPN</strong> package is more versatile than static tables in that the number of tubes can vary across dilution levels, the user can choose any number (or levels) of dilutions, and the confidence level can be changed. Also, the Rarity Index, which quantifies the validity of the results, is included.</p>
+<p>The <strong>MPN</strong> package is more versatile than static Most Probable Number tables in that the number of tubes can vary across dilution levels, the user can choose any number (or levels) of dilutions, and the confidence level can be changed. Also, the Rarity Index, which quantifies the validity of the results, is included.</p>
 <hr />
 <div id="references" class="section level3">
 <h3>References</h3>
@@ -256,9 +273,11 @@ my_amount   &lt;-<span class="st"> </span><span class="dv">10</span> <span class
 <li><p>Blodgett RJ (2002). “Measuring improbability of outcomes from a serial dilution test.” <em>Communications in Statistics: Theory and Methods</em>, 31(12), 2209-2223. <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222" class="uri">https://www.tandfonline.com/doi/abs/10.1081/STA-120017222</a></p></li>
 <li><p>Blodgett RJ (2005). “Serial dilution with a confirmation step.” <em>Food Microbiology</em>, 22(6), 547-552. <a href="https://doi.org/10.1016/j.fm.2004.11.017" class="uri">https://doi.org/10.1016/j.fm.2004.11.017</a></p></li>
 <li><p>Blodgett RJ (2010). “Does a serial dilution experiment’s model agree with its outcome?” <em>Model Assisted Statistics and Applications</em>, 5(3), 209-215. <a href="https://doi.org/10.3233/MAS-2010-0157" class="uri">https://doi.org/10.3233/MAS-2010-0157</a></p></li>
+<li><p>Haas CN (1989). “Estimation of microbial densities from dilution count experiments” <em>Applied and Environmental Microbiology</em> 55(8), 1934-1942.</p></li>
 <li><p>Haas CN, Rose JB, Gerba CP (2014). “Quantitative microbial risk assessment, Second Ed.” <em>John Wiley &amp; Sons, Inc.</em>, ISBN 978-1-118-14529-6.</p></li>
 <li><p>Jarvis B, Wilrich C, Wilrich P-T (2010). “Reconsideration of the derivation of Most Probable Numbers, their standard deviations, confidence bounds and rarity values.” <em>Journal of Applied Microbiology</em>, 109, 1660-1667. <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x" class="uri">https://doi.org/10.1111/j.1365-2672.2010.04792.x</a></p></li>
 <li><p>Ridout MS (1994). “A Comparison of Confidence Interval Methods for Dilution Series Experiments.” <em>Biometrics</em>, 50(1), 289-296.</p></li>
+<li><p>Salama IA, Koch GG, Tolley DH (1978). “On the estimation of the most probable number in a serial dilution technique.” <em>Communications in Statistics - Theory and Methods</em>, 7(13), 1267-1281.</p></li>
 </ol>
 </div>
 </div>
