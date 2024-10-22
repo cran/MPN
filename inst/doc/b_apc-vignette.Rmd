@@ -130,11 +130,10 @@ abline(v = my_apc$UB, lty = 3, col = "blue")
 ### References
 
 1. Bacteriological Analytical Manual, 8th Edition, Chapter 3,
-<https://www.fda.gov/food/foodscienceresearch/laboratorymethods/ucm063346.htm>
+<https://www.fda.gov/food/laboratory-methods-food/bam-chapter-3-aerobic-plate-count>
 
 2. Haas CN, Heller B (1988). "Averaging of TNTC counts."
 *Applied and Environmental Microbiology*, 54(8), 2069-2072.
-<https://aem.asm.org/content/54/8/2069>
 
 3. Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk assessment,
 Second Ed." *John Wiley & Sons, Inc.*, ISBN 978-1-118-14529-6.

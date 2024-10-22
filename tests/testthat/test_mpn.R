@@ -394,3 +394,16 @@ test_that("Salama et al. (1978) adjustment", {
   expect_equal(x18$MPN, .0777, tol = .001)
   expect_equal(x18$MPN_adj, .0688, tol = .001)
 })
+
+# Changes in v0.4.0 ------------------------------------------------------------
+
+test_that("Extreme case (per 100 g with low microbial density)", {
+  # Rare case where rounding to one decimal can be affected
+  pt_est <- 100 * mpn(positive = c(7, 1, 1), tubes = c(10, 10, 10),
+    amount = c(10, 1, .1)
+  )$MPN
+  # 13.2495 (In v0.3.0, this was 13.2508)
+  only_decimal <- pt_est - floor(pt_est)
+  first_two_places <- substr(as.character(only_decimal), 3, 4)
+  expect_identical(first_two_places, "24")
+})

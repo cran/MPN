@@ -1,61 +1,118 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Martine Ferguson &amp; John Ihrie" />
 
-<meta name="date" content="2019-03-20" />
+<meta name="date" content="2024-10-22" />
 
 <title>MPN: Most Probable Number for Serial Dilutions</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
 <style type="text/css" data-origin="pandoc">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -64,13 +121,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -81,7 +145,191 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
 
 </head>
 
@@ -90,198 +338,264 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">MPN: Most Probable Number for Serial Dilutions</h1>
-<h4 class="author"><em>Martine Ferguson &amp; John Ihrie</em></h4>
-<h4 class="date"><em>2019-03-20</em></h4>
+<h1 class="title toc-ignore">MPN: Most Probable Number for Serial
+Dilutions</h1>
+<h4 class="author">Martine Ferguson &amp; John Ihrie</h4>
+<h4 class="date">2024-10-22</h4>
 
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The <strong>MPN</strong> package computes the Most Probable Number (i.e. microbial density) and other microbial enumeration metrics derived from serial dilutions.</p>
+<p>The <strong>MPN</strong> package computes the Most Probable Number
+(i.e. microbial density) and other microbial enumeration metrics derived
+from serial dilutions.</p>
 </div>
 <div id="mpn" class="section level2">
 <h2><code>mpn()</code></h2>
-<p><strong>MPN</strong> includes the <code>mpn()</code> function to estimate the Most Probable Number (<em>MPN</em>), its variance and confidence interval, and Blodgett’s ( <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222">2</a>, <a href="https://doi.org/10.1016/j.fm.2004.11.017">3</a>, <a href="https://doi.org/10.3233/MAS-2010-0157">4</a> ) Rarity Index (<em>RI</em>).</p>
-<p>The user inputs the number of dilutions, number of tubes, number of positive tubes, amount of inocula, confidence level, and confidence interval method.</p>
+<p><strong>MPN</strong> includes the <code>mpn()</code> function to
+estimate the Most Probable Number (<em>MPN</em>), its variance and
+confidence interval, and Blodgett’s (<em>2, 3, 4</em>) Rarity Index
+(<em>RI</em>).</p>
+<p>The user inputs the number of dilutions, number of tubes, number of
+positive tubes, amount of inocula, confidence level, and confidence
+interval method.</p>
 </div>
 <div id="maximum-likelihood-estimation" class="section level2">
 <h2>Maximum Likelihood Estimation</h2>
-<p>As discussed in the references, <em>MPN</em> is estimated by maximizing likelihood. Combining the notaton of Blodgett ( <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222">2</a> ) and Jarvis et al. ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">7</a> ), we write the likelihood function as:</p>
-<p><span class="math display">\[L = L(\lambda; x_i, n_i, z_i, i = 1,...,k)
+<p>As discussed in the references, <em>MPN</em> is estimated by
+maximizing likelihood. Combining the notaton of Blodgett (<em>2</em>)
+and Jarvis et al. (<em>7</em>), we write the likelihood function as:</p>
+<p><span class="math display">\[L = L(\lambda; x_i, n_i, z_i, i =
+1,...,k)
     = \prod_{i=1}^k \binom{n_i}{x_i} {(1-exp(-{\lambda}{z_i}))} ^ {x_i}
     {(exp(-{\lambda}{z_i}))} ^ {n_i-x_i}\]</span></p>
 <p>where</p>
 <ul>
-<li><span class="math inline">\(\lambda\)</span> is the microbial density (concentration) to be estimated</li>
-<li><span class="math inline">\(k\)</span> is the number of dilution levels</li>
-<li><span class="math inline">\(x_i\)</span> is the number of positive tubes at the <span class="math inline">\(i^{th}\)</span> dilution level</li>
-<li><span class="math inline">\(n_i\)</span> is the total number of tubes at the <span class="math inline">\(i^{th}\)</span> dilution level</li>
-<li><span class="math inline">\(z_i\)</span> is the amount of inoculum per tube at the <span class="math inline">\(i^{th}\)</span> dilution level</li>
+<li><span class="math inline">\(\lambda\)</span> is the microbial
+density (concentration) to be estimated</li>
+<li><span class="math inline">\(k\)</span> is the number of dilution
+levels</li>
+<li><span class="math inline">\(x_i\)</span> is the number of positive
+tubes at the <span class="math inline">\(i^{th}\)</span> dilution
+level</li>
+<li><span class="math inline">\(n_i\)</span> is the total number of
+tubes at the <span class="math inline">\(i^{th}\)</span> dilution
+level</li>
+<li><span class="math inline">\(z_i\)</span> is the amount of inoculum
+per tube at the <span class="math inline">\(i^{th}\)</span> dilution
+level</li>
 </ul>
 <p>As an <em>R</em> function:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#likelihood</span>
-L &lt;-<span class="st"> </span><span class="cf">function</span>(lambda, positive, tubes, amount) {
-  binom_coef &lt;-<span class="st"> </span><span class="kw">choose</span>(tubes, positive)
-  exp_term   &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="op">-</span>lambda <span class="op">*</span><span class="st"> </span>amount)
-  <span class="kw">prod</span>(binom_coef <span class="op">*</span><span class="st"> </span>((<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>exp_term) <span class="op">^</span><span class="st"> </span>positive) <span class="op">*</span><span class="st"> </span>exp_term <span class="op">^</span><span class="st"> </span>(tubes <span class="op">-</span><span class="st"> </span>positive))
-}
-L_vec &lt;-<span class="st"> </span><span class="kw">Vectorize</span>(L, <span class="st">&quot;lambda&quot;</span>)</code></pre></div>
-<p>As is typical of maximum likelihood approaches, <code>mpn()</code> uses the score function (derivative of the log-likelihood) to solve for <span class="math inline">\(\hat{\lambda}\)</span>, the maximum likelihood estimate (MLE) of <span class="math inline">\(\lambda\)</span> (i.e., the point estimate of <em>MPN</em>). However, let’s demonstrate what is happening in terms of the likelihood function itself. Assume we have 10g of undiluted inoculum in each of 3 tubes. Now we use a 10-fold dilution twice (i.e., the relative dilution levels are 1, .1, .01). Also assume that exactly 1 of the 3 tubes is positive at each dilution level:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#MPN calculation</span>
-<span class="kw">library</span>(MPN)
-my_positive &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>) <span class="co">#xi</span>
-my_tubes    &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>) <span class="co">#ni</span>
-my_amount   &lt;-<span class="st"> </span><span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, .<span class="dv">1</span>, .<span class="dv">01</span>)  <span class="co">#zi</span>
-(my_mpn &lt;-<span class="st"> </span><span class="kw">mpn</span>(my_positive, my_tubes, my_amount))
-<span class="co">#&gt; $MPN</span>
-<span class="co">#&gt; [1] 0.1118076</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $MPN_adj</span>
-<span class="co">#&gt; [1] 0.08724619</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $variance</span>
-<span class="co">#&gt; [1] 0.004309218</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $var_log</span>
-<span class="co">#&gt; [1] 0.3447116</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $conf_level</span>
-<span class="co">#&gt; [1] 0.95</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $CI_method</span>
-<span class="co">#&gt; [1] &quot;Jarvis&quot;</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $LB</span>
-<span class="co">#&gt; [1] 0.03537632</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $UB</span>
-<span class="co">#&gt; [1] 0.3533702</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $RI</span>
-<span class="co">#&gt; [1] 0.005813954</span></code></pre></div>
-<p>If we plot the likelihood function, we see that <span class="math inline">\(\hat{\lambda}\)</span> maximizes the likelihood:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_mpn<span class="op">$</span>MPN
-<span class="co">#&gt; [1] 0.1118076</span>
-lambda &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dt">by =</span> .<span class="dv">001</span>)
-my_L   &lt;-<span class="st"> </span><span class="kw">L_vec</span>(lambda, my_positive, my_tubes, my_amount)
-<span class="kw">plot</span>(lambda, my_L, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;Likelihood&quot;</span>, <span class="dt">main =</span> <span class="st">&quot;Maximum Likelihood&quot;</span>)
-<span class="kw">abline</span>(<span class="dt">v =</span> my_mpn<span class="op">$</span>MPN, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>)</code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co">#likelihood</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="cf">function</span>(lambda, positive, tubes, amount) {</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  binom_coef <span class="ot">&lt;-</span> <span class="fu">choose</span>(tubes, positive)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  exp_term   <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>lambda <span class="sc">*</span> amount)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">prod</span>(binom_coef <span class="sc">*</span> ((<span class="dv">1</span> <span class="sc">-</span> exp_term) <span class="sc">^</span> positive) <span class="sc">*</span> exp_term <span class="sc">^</span> (tubes <span class="sc">-</span> positive))</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>}</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>L_vec <span class="ot">&lt;-</span> <span class="fu">Vectorize</span>(L, <span class="st">&quot;lambda&quot;</span>)</span></code></pre></div>
+<p>As is typical of maximum likelihood approaches, <code>mpn()</code>
+uses the score function (derivative of the log-likelihood) to solve for
+<span class="math inline">\(\hat{\lambda}\)</span>, the maximum
+likelihood estimate (MLE) of <span class="math inline">\(\lambda\)</span> (i.e., the point estimate of
+<em>MPN</em>). However, let’s demonstrate what is happening in terms of
+the likelihood function itself. Assume we have 10g of undiluted inoculum
+in each of 3 tubes. Now we use a 10-fold dilution twice (i.e., the
+relative dilution levels are 1, .1, .01). Also assume that exactly 1 of
+the 3 tubes is positive at each dilution level:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co">#MPN calculation</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(MPN)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>my_positive <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>) <span class="co">#xi</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>my_tubes    <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>) <span class="co">#ni</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>my_amount   <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, .<span class="dv">1</span>, .<span class="dv">01</span>)  <span class="co">#zi</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>(my_mpn <span class="ot">&lt;-</span> <span class="fu">mpn</span>(my_positive, my_tubes, my_amount))</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; $MPN</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; [1] 0.1118255</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; $MPN_adj</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; [1] 0.08725827</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; $variance</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; [1] 0.00431064</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; $var_log</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; [1] 0.3447151</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; $conf_level</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; [1] 0.95</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; $CI_method</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Jarvis&quot;</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; $LB</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; [1] 0.03538176</span></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt; $UB</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt; [1] 0.3534288</span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt; $RI</span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt; [1] 0.005814327</span></span></code></pre></div>
+<p>If we plot the likelihood function, we see that <span class="math inline">\(\hat{\lambda}\)</span> maximizes the
+likelihood:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>my_mpn<span class="sc">$</span>MPN</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; [1] 0.1118255</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="at">by =</span> .<span class="dv">001</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>my_L   <span class="ot">&lt;-</span> <span class="fu">L_vec</span>(lambda, my_positive, my_tubes, my_amount)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">plot</span>(lambda, my_L, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;Likelihood&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Maximum Likelihood&quot;</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> my_mpn<span class="sc">$</span>MPN, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>If none of the tubes are positive, the MLE is zero:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">no_positive &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>) <span class="co">#xi</span>
-(mpn_no_pos &lt;-<span class="st"> </span><span class="kw">mpn</span>(no_positive, my_tubes, my_amount)<span class="op">$</span>MPN)
-<span class="co">#&gt; [1] 0</span>
-L_no_pos &lt;-<span class="st"> </span><span class="kw">L_vec</span>(lambda, no_positive, my_tubes, my_amount)
-<span class="kw">plot</span>(lambda, L_no_pos, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">0.02</span>, <span class="fl">0.2</span>), <span class="dt">ylab =</span> <span class="st">&quot;Likelihood&quot;</span>,
-     <span class="dt">main =</span> <span class="st">&quot;No Positives&quot;</span>)
-<span class="kw">abline</span>(<span class="dt">v =</span> mpn_no_pos, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>)</code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>no_positive <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>) <span class="co">#xi</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>(mpn_no_pos <span class="ot">&lt;-</span> <span class="fu">mpn</span>(no_positive, my_tubes, my_amount)<span class="sc">$</span>MPN)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>L_no_pos <span class="ot">&lt;-</span> <span class="fu">L_vec</span>(lambda, no_positive, my_tubes, my_amount)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">plot</span>(lambda, L_no_pos, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.02</span>, <span class="fl">0.2</span>), <span class="at">ylab =</span> <span class="st">&quot;Likelihood&quot;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;No Positives&quot;</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mpn_no_pos, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAsVBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZmYAZrY6AAA6ADo6AGY6OgA6OmY6ZpA6ZrY6kLY6kNtmAABmADpmOgBmOjpmZgBmkJBmkLZmkNtmtrZmtttmtv+QOgCQOmaQZgCQZjqQkDqQkGaQkNuQtv+Q27aQ2/+2ZgC2Zjq2ZpC225C229u22/+2/9u2///bkDrbkGbbtmbbtpDb27bb////AAD/tmb/25D/27b//7b//9v///85IbcVAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAJVUlEQVR4nO2deWObNhyGSdou3rrDWbfuSHZ0W9y1XdhR48T+/h9sOgBDYnh1I8j7/BFjI37CTyQhLAHFgYxSTL0DuUNBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBEgraFMWVeLm/LC5OrC0LzecfBgPsr4sXH8XLn7fNYgLSCpJfCggqzm6GAmgrd6/OlytIFiEkCH3zTSEEpSOxIPHdGkH/flMUz75rZZT6e99d6iLUWfv3S1GsvvhQlyAZpTj/Sy+qTSrlff9WpPqyv0EIEgsq1o2g8kFxqQWJVymos7ZebOpVR5A2I+KKZCKq5Pltd4MQJBV0/q3YbS1ot5Jfq5TGNLWg/y7la2etTP7x8I9c1A3PpnUl/lyoKrtWwT/IzXobhCCtoHfiG2hBdfU4Nii9NqizVnzp5+91koeCtFRV5LQl9UFngxCkFXS7Kc7+kIKao1DZHrS6R7HuWrFc1M3RI0HCxVW71Gzd2SAEiQWJL/KJFNS01HUzcmgFqca1t/bulV7x+2NBso6paiVTtnqPG4QgsSDt4XQJOraqD9bevXmpat4jQXKjX1UaWZaOOTUbhNjr1ILU0eZ0G9Q57Dxau/9ZLD4WpGrWyd6n2iDEXqcWpIrQyFFM01krKs9XsvvclqCy20rVnU+5cPaj7ESpg3+zQYi9Ti5IFqGxflDzrl379kHbXbX9oINqe/RmdT9IVrfjBiFILkh+p2NP+vt2bV9Qd+0/L+tz2LplFgKev68FHavW3S+iuunuc7tBCPhzB4CCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBgMCCitkwlaCw4eJBQQAKAiQWNF61t0HyCEtWJYiCQDgKAuEoCISjIBAux0NbVoJyNERBgKwEbSloPNw2wyJEQYBIgjZFcaEumr0aSPDEBZXqikh1rfrARelD/aDsDEURtL+W1xerK/nKgesdh8I9DUH3l6JmVfqywYErZp+2oCdcgupLYhUjV1O3bZBSZZzvQtqgSl2hXY1eLOx6FFuCoP21vnx4qPJ45Lu12aFE2AtSLfBhuPn1yHcZgppmZWNUgkqbo9gyBIk2SBah0umGBQbjcZkZcjnMq0OZ5w0vFi0obr5PQ5C+u9NIX2n4N+kFCFI34xltgsrmZjbV0B3Uliyoqm+TNtQH7PWfrU41tna7lAT3w/xIR7HpKh0sT1aXIcigo8gSJBk71Wjrn10bZLtPKYjSBh3P+gclLlmQwVHML9/ZC4qW73Zs5URQECCrKrYQQSaNtFu+yxBkcph3zHc7unYasvpF0XBtUrIqQYZrk5JVG2S8OiFZHsXmLihavhRkPNN+1oLgz6nO+W7B+ilwELQJcYvzBQsanBMVNt9cDLl3FCPnO19BzeSFyPnOV5DoBgUoQqgNmqsgwwlUjvluYYr0ZNpRjJCjIxQEiCpopLUyEJSHIes2aN02Q8NtkEFLZZLvHAUZUo8X2pYgnyxjEamK3V/qZzJR0CCbsxvfNigLQ/H6QWWx9hWUg6GIR7Hd6hkFjbK/Hv7detGC7uXz3TZ+P3qYCcrAkMuoxtlN+eKj4c9CVhPJPdJFw21cTI6JDX318Si2N3aaoSD5g5kUFHNk1SVhJNxLkNm1Glb5nrp3x/wE1W3Q+Miqx0Ry5z2Mg+NRLOJEcqOU6YjSFvhNA/bJOTwOjfRv+nX/08jPHT4TyY2SJsN5XKwaORdzLUEo6ylwnP7y6JnSffwmkvslDoxLG1ThU3mvieS+qYPi1EgPlgvPfAfvYTY3QfVlq8HzHb7J23SG8h04NEifgozHxWJmb85cBE1mKCtBKXcgeLY2A4ch8/XaJADzKUEUBO/lan5/+YC4C4p09xfrjSIzK0FTGEosyPeW7elr2bxK0ARlKCtBRhsmVjQ7QakNZXWyarptSkVz6geNbxyJWQpKWYbmKSihorkKSmZotoJSKYokyG1s3pYUiuIIchybt8d8opFzDsETHoKPrI4SW1EUQWHH5hEW89VcogdPeAg9u8OAiI5itUFOY/NeT4eKJCnSUcxtbN778Vk200NNQwZP6BEuyPPF7GbR4nDBE04S7kQGlvONB+MET9jHdyK5P0Uf682DJxyPEuofG2APDDEOHHg/T33IZxyCcE9IUMCJ5BOT1cnqkxFkcqpxiq11C5qAGIIMTlZd8zDZjXRhXJMblCDXPJYhyOBk1TWPhQjCJ6uueSxFkBsU5J8HBfknoaB8wngkd4KClgwFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCxBFUde/U1L6pbJ+M82CD3We33mHU0OfaIkwUQZXIuWpyb9/0PrUOI38QV2NNXmH212KhlLe4MQ0TQ5AeHtpc9N/0PrUOo/7jUpBfGH0b2vL81jhMDEHtXvTe9D61DiNHmtRopWcYHevsxjhMFEGfypJbD762b3qfWoc5NIv+YdRTeozDxBCkq3Zdwds3vU+tw6gP5NfxD6OGPY3DPEFBVdNGTyYo7yqmh80nrWJRGulDI8gzTNl9cMFEjXScw3wtyDNMM/9i0sN8pI5iXSG8wuxW6xOfjhHnVKPU3Xj9SK6y6dOXtucIvTBti+ETptSzU+RbwzA8WQVQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCAPkI6tw6pc+u/3h7q4kL/lAQgIIAmQnaFIWc4bRb/XBZFOvdSr7brV6v6tnxcsrKGymoTpeAvATJGV+lELBbqQnx57d67p76ZK2m7x4qOaunSZeArATdf32ja5TSUf+50rPC2lmOm7ObNl0CshIkXypdq64O7R9tQk4kbqfgNekSkJcg0cacv1s9FKRm7Iq/ZSuoSZeArAS1XkAJOq6OT1aC9FT6x1VMtUEvPtZzm2tT/o8VNiIrQdLA/aU4oj8QJGfsSh2lWtAlSKVLQFaC9NTcTbcOKUGvV3WL3PSDmnQJdisfQZlCQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUB/gfK3kg+qv6oVAAAAABJRU5ErkJggg==" /><!-- --></p>
 <p>If all of the tubes are positive, then no finite MLE exists:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">all_positive &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>) <span class="co">#xi</span>
-<span class="kw">mpn</span>(my_tubes, all_positive, my_amount)<span class="op">$</span>MPN
-<span class="co">#&gt; [1] Inf</span>
-lambda &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">200</span>, <span class="dt">by =</span> .<span class="dv">1</span>)
-L_all_pos &lt;-<span class="st"> </span><span class="kw">L_vec</span>(lambda, all_positive, my_tubes, my_amount)
-<span class="kw">plot</span>(lambda, L_all_pos, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">100</span>), <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">1.1</span>),
-     <span class="dt">ylab =</span> <span class="st">&quot;Likelihood&quot;</span>, <span class="dt">main =</span> <span class="st">&quot;All Positives&quot;</span>)
-<span class="kw">abline</span>(<span class="dt">h =</span> <span class="dv">1</span>, <span class="dt">lty =</span> <span class="dv">2</span>)</code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
-<p>From a practical perspective, if all the tubes are positive, then the scientist should probably further dilute the sample until some tubes are negative.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>all_positive <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>) <span class="co">#xi</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">mpn</span>(my_tubes, all_positive, my_amount)<span class="sc">$</span>MPN</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; [1] Inf</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">200</span>, <span class="at">by =</span> .<span class="dv">1</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>L_all_pos <span class="ot">&lt;-</span> <span class="fu">L_vec</span>(lambda, all_positive, my_tubes, my_amount)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">plot</span>(lambda, L_all_pos, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1.1</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;Likelihood&quot;</span>, <span class="at">main =</span> <span class="st">&quot;All Positives&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>From a practical perspective, if all the tubes are positive, then the
+scientist should probably further dilute the sample until some tubes are
+negative.</p>
 </div>
 <div id="bias-adjustment" class="section level2">
 <h2>Bias Adjustment</h2>
-<p><code>mpn()</code> also returns a bias-adjusted version (<em>9</em>, <em>5</em>, <em>6</em>) of the point estimate:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_mpn<span class="op">$</span>MPN
-<span class="co">#&gt; [1] 0.1118076</span>
-my_mpn<span class="op">$</span>MPN_adj
-<span class="co">#&gt; [1] 0.08724619</span></code></pre></div>
+<p><code>mpn()</code> also returns a bias-adjusted version (<em>9, 5,
+6</em>) of the point estimate:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>my_mpn<span class="sc">$</span>MPN</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; [1] 0.1118255</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>my_mpn<span class="sc">$</span>MPN_adj</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; [1] 0.08725827</span></span></code></pre></div>
 </div>
 <div id="confidence-intervals" class="section level2">
 <h2>Confidence Intervals</h2>
-<p>As discussed in the references, many different confidence intervals (CIs) can be calculated for the Most Probable Number. Currently, <code>mpn()</code> computes a CI using the approach of Jarvis et al. ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">7</a> ) or the likelihood ratio approach of Ridout (<em>8</em>). However, since these approaches rely on large-sample theory, the results are more reliable for larger experiments.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_positive &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>)
-my_tubes    &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>)
-my_amount   &lt;-<span class="st"> </span><span class="dv">10</span> <span class="op">*</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, .<span class="dv">1</span>, .<span class="dv">01</span>)
-<span class="kw">mpn</span>(my_positive, my_tubes, my_amount)  <span class="co">#Jarvis approach</span>
-<span class="co">#&gt; $MPN</span>
-<span class="co">#&gt; [1] 0.1118076</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $MPN_adj</span>
-<span class="co">#&gt; [1] 0.08724619</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $variance</span>
-<span class="co">#&gt; [1] 0.004309218</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $var_log</span>
-<span class="co">#&gt; [1] 0.3447116</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $conf_level</span>
-<span class="co">#&gt; [1] 0.95</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $CI_method</span>
-<span class="co">#&gt; [1] &quot;Jarvis&quot;</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $LB</span>
-<span class="co">#&gt; [1] 0.03537632</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $UB</span>
-<span class="co">#&gt; [1] 0.3533702</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $RI</span>
-<span class="co">#&gt; [1] 0.005813954</span>
-<span class="kw">mpn</span>(my_positive, my_tubes, my_amount, <span class="dt">CI_method =</span> <span class="st">&quot;LR&quot;</span>)  <span class="co">#likelihood ratio</span>
-<span class="co">#&gt; $MPN</span>
-<span class="co">#&gt; [1] 0.1118076</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $MPN_adj</span>
-<span class="co">#&gt; [1] 0.08724619</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $variance</span>
-<span class="co">#&gt; [1] NA</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $var_log</span>
-<span class="co">#&gt; [1] NA</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $conf_level</span>
-<span class="co">#&gt; [1] 0.95</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $CI_method</span>
-<span class="co">#&gt; [1] &quot;LR&quot;</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $LB</span>
-<span class="co">#&gt; [1] 0.02745595</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $UB</span>
-<span class="co">#&gt; [1] 0.2975106</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $RI</span>
-<span class="co">#&gt; [1] 0.005813954</span></code></pre></div>
+<p>As discussed in the references, many different confidence intervals
+(CIs) can be calculated for the Most Probable Number. Currently,
+<code>mpn()</code> computes a CI using the approach of Jarvis et
+al. (<em>7</em>) or the likelihood ratio approach of Ridout
+(<em>8</em>). However, since these approaches rely on large-sample
+theory, the results are more reliable for larger experiments.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>my_positive <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>my_tubes    <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>my_amount   <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, .<span class="dv">1</span>, .<span class="dv">01</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">mpn</span>(my_positive, my_tubes, my_amount)  <span class="co">#Jarvis approach</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; $MPN</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; [1] 0.1118255</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; $MPN_adj</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; [1] 0.08725827</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; $variance</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; [1] 0.00431064</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; $var_log</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; [1] 0.3447151</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; $conf_level</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; [1] 0.95</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; $CI_method</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Jarvis&quot;</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; $LB</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt; [1] 0.03538176</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; $UB</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; [1] 0.3534288</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; $RI</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt; [1] 0.005814327</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="fu">mpn</span>(my_positive, my_tubes, my_amount, <span class="at">CI_method =</span> <span class="st">&quot;LR&quot;</span>)  <span class="co">#likelihood ratio</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt; $MPN</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#&gt; [1] 0.1118255</span></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt; $MPN_adj</span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; [1] 0.08725827</span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#&gt; $variance</span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co">#&gt; [1] NA</span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#&gt; $var_log</span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#&gt; [1] NA</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt; $conf_level</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#&gt; [1] 0.95</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; $CI_method</span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#&gt; [1] &quot;LR&quot;</span></span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#&gt; $LB</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#&gt; [1] 0.02745596</span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a><span class="co">#&gt; $UB</span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a><span class="co">#&gt; [1] 0.2975111</span></span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a><span class="co">#&gt; $RI</span></span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a><span class="co">#&gt; [1] 0.005814327</span></span></code></pre></div>
 </div>
 <div id="rarity-index" class="section level2">
 <h2>Rarity Index</h2>
-<p>As Jarvis ( <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x">7</a> ) explains, Blodgett’s ( <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222">2</a>, <a href="https://doi.org/10.1016/j.fm.2004.11.017">3</a>, <a href="https://doi.org/10.3233/MAS-2010-0157">4</a> ) Rarity Index is a ratio of two likelihoods. The likelihood in the numerator is for the actual results (i.e., evaluated at the <em>MPN</em> point estimate). The likelihood in the denominator is for the (hypothetical) results that would have given the largest possible likelihood. So <em>RI</em> is larger than 0 and at most 1. Values of <em>RI</em> that are very small are unlikely; therefore, the results should be regarded with suspicion.</p>
+<p>As Jarvis (7) explains, Blodgett’s (<em>2, 3, 4</em>) Rarity Index is
+a ratio of two likelihoods. The likelihood in the numerator is for the
+actual results (i.e., evaluated at the <em>MPN</em> point estimate). The
+likelihood in the denominator is for the (hypothetical) results that
+would have given the largest possible likelihood. So <em>RI</em> is
+larger than 0 and at most 1. Values of <em>RI</em> that are very small
+are unlikely; therefore, the results should be regarded with
+suspicion.</p>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<p>The <strong>MPN</strong> package is more versatile than static Most Probable Number tables in that the number of tubes can vary across dilution levels, the user can choose any number (or levels) of dilutions, and the confidence level can be changed. Also, the Rarity Index, which quantifies the validity of the results, is included.</p>
+<p>The <strong>MPN</strong> package is more versatile than static Most
+Probable Number tables in that the number of tubes can vary across
+dilution levels, the user can choose any number (or levels) of
+dilutions, and the confidence level can be changed. Also, the Rarity
+Index, which quantifies the validity of the results, is included.</p>
 <hr />
 <div id="references" class="section level3">
 <h3>References</h3>
 <ol style="list-style-type: decimal">
-<li><p>Bacteriological Analytical Manual, 8th Edition, Appendix 2, <a href="https://www.fda.gov/Food/FoodScienceResearch/LaboratoryMethods/ucm109656.htm" class="uri">https://www.fda.gov/Food/FoodScienceResearch/LaboratoryMethods/ucm109656.htm</a></p></li>
-<li><p>Blodgett RJ (2002). “Measuring improbability of outcomes from a serial dilution test.” <em>Communications in Statistics: Theory and Methods</em>, 31(12), 2209-2223. <a href="https://www.tandfonline.com/doi/abs/10.1081/STA-120017222" class="uri">https://www.tandfonline.com/doi/abs/10.1081/STA-120017222</a></p></li>
-<li><p>Blodgett RJ (2005). “Serial dilution with a confirmation step.” <em>Food Microbiology</em>, 22(6), 547-552. <a href="https://doi.org/10.1016/j.fm.2004.11.017" class="uri">https://doi.org/10.1016/j.fm.2004.11.017</a></p></li>
-<li><p>Blodgett RJ (2010). “Does a serial dilution experiment’s model agree with its outcome?” <em>Model Assisted Statistics and Applications</em>, 5(3), 209-215. <a href="https://doi.org/10.3233/MAS-2010-0157" class="uri">https://doi.org/10.3233/MAS-2010-0157</a></p></li>
-<li><p>Haas CN (1989). “Estimation of microbial densities from dilution count experiments” <em>Applied and Environmental Microbiology</em> 55(8), 1934-1942.</p></li>
-<li><p>Haas CN, Rose JB, Gerba CP (2014). “Quantitative microbial risk assessment, Second Ed.” <em>John Wiley &amp; Sons, Inc.</em>, ISBN 978-1-118-14529-6.</p></li>
-<li><p>Jarvis B, Wilrich C, Wilrich P-T (2010). “Reconsideration of the derivation of Most Probable Numbers, their standard deviations, confidence bounds and rarity values.” <em>Journal of Applied Microbiology</em>, 109, 1660-1667. <a href="https://doi.org/10.1111/j.1365-2672.2010.04792.x" class="uri">https://doi.org/10.1111/j.1365-2672.2010.04792.x</a></p></li>
-<li><p>Ridout MS (1994). “A Comparison of Confidence Interval Methods for Dilution Series Experiments.” <em>Biometrics</em>, 50(1), 289-296.</p></li>
-<li><p>Salama IA, Koch GG, Tolley DH (1978). “On the estimation of the most probable number in a serial dilution technique.” <em>Communications in Statistics - Theory and Methods</em>, 7(13), 1267-1281.</p></li>
+<li><p>Bacteriological Analytical Manual, 8th Edition, Appendix 2, <a href="https://www.fda.gov/food/laboratory-methods-food/bam-appendix-2-most-probable-number-serial-dilutions" class="uri">https://www.fda.gov/food/laboratory-methods-food/bam-appendix-2-most-probable-number-serial-dilutions</a></p></li>
+<li><p>Blodgett RJ (2002). “Measuring improbability of outcomes from a
+serial dilution test.” <em>Communications in Statistics: Theory and
+Methods</em>, 31(12), 2209-2223.</p></li>
+<li><p>Blodgett RJ (2005). “Serial dilution with a confirmation step.”
+<em>Food Microbiology</em>, 22(6), 547-552.</p></li>
+<li><p>Blodgett RJ (2010). “Does a serial dilution experiment’s model
+agree with its outcome?” <em>Model Assisted Statistics and
+Applications</em>, 5(3), 209-215.</p></li>
+<li><p>Haas CN (1989). “Estimation of microbial densities from dilution
+count experiments” <em>Applied and Environmental Microbiology</em>
+55(8), 1934-1942.</p></li>
+<li><p>Haas CN, Rose JB, Gerba CP (2014). “Quantitative microbial risk
+assessment, Second Ed.” <em>John Wiley &amp; Sons, Inc.</em>, ISBN
+978-1-118-14529-6.</p></li>
+<li><p>Jarvis B, Wilrich C, Wilrich P-T (2010). “Reconsideration of the
+derivation of Most Probable Numbers, their standard deviations,
+confidence bounds and rarity values.” <em>Journal of Applied
+Microbiology</em>, 109, 1660-1667.</p></li>
+<li><p>Ridout MS (1994). “A Comparison of Confidence Interval Methods
+for Dilution Series Experiments.” <em>Biometrics</em>, 50(1),
+289-296.</p></li>
+<li><p>Salama IA, Koch GG, Tolley DH (1978). “On the estimation of the
+most probable number in a serial dilution technique.” <em>Communications
+in Statistics - Theory and Methods</em>, 7(13), 1267-1281.</p></li>
 </ol>
 </div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

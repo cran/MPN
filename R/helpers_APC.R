@@ -1,6 +1,6 @@
 # Point estimate for APC -------------------------------------------------------
 
-.ptEst_APC <- function(count, amount_scor, amount_tntc, tntc_limit) {
+.ptEst_APC <- function(count, amount_scor, amount_tntc, tntc_limit, tol) {
   if (sum(count) == 0) {
     return(0)
   }
@@ -10,11 +10,11 @@
     lower_search <- optimize(.logLscor_APC, count = count,
                              amount_scor = amount_scor,
                              lower = lower_search, upper = upper_search,
-                             tol = 1e-05, maximum = TRUE)$maximum
+                             tol = tol, maximum = TRUE)$maximum
   }
   optimize(.logL_APC, count = count, amount_scor = amount_scor,
            amount_tntc = amount_tntc, tntc_limit = tntc_limit,
-           lower = lower_search, upper = upper_search, tol = 1e-05,
+           lower = lower_search, upper = upper_search, tol = tol,
            maximum = TRUE)$maximum
 }
 
@@ -78,7 +78,7 @@
 # Confidence intervals ---------------------------------------------------------
 
 .likeRatioCI_APC <- function(lambda_hat, count, amount_scor, amount_tntc,
-                             tntc_limit, conf_level) {
+                             tntc_limit, conf_level, tol) {
   if (sum(count) == 0) {
     LB <- UB <- NA
   } else {
@@ -87,13 +87,13 @@
                   lambda_hat = lambda_hat, count = count,
                   amount_scor = amount_scor, amount_tntc = amount_tntc,
                   tntc_limit = tntc_limit, crit_val = crit_val,
-                  extendInt = "downX", maxiter = 1e+04)$root
+                  extendInt = "downX", tol = tol, maxiter = 1e+04)$root
 
     UB <- uniroot(.logLRroot_APC, interval = c(lambda_hat, 2 * lambda_hat),
                   lambda_hat = lambda_hat, count = count,
                   amount_scor = amount_scor, amount_tntc = amount_tntc,
                   tntc_limit = tntc_limit, crit_val = crit_val,
-                  extendInt = "upX", maxiter = 1e+04)$root
+                  extendInt = "upX", tol = tol, maxiter = 1e+04)$root
   }
   list(LB = LB, UB = UB)
 }

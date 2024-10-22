@@ -4,8 +4,14 @@
 \alias{apc}
 \title{Calculate aerobic plate count (APC)}
 \usage{
-apc(count, amount_scor, amount_tntc = NULL, tntc_limit = 250,
-  conf_level = 0.95)
+apc(
+  count,
+  amount_scor,
+  amount_tntc = NULL,
+  tntc_limit = 250,
+  conf_level = 0.95,
+  tol = 1e-06
+)
 }
 \arguments{
 \item{count}{A vector of CFU counts in each scorable (countable) plate.}
@@ -21,14 +27,17 @@ plate can potentially have a different value. Default is 250.}
 
 \item{conf_level}{A scalar value between zero and one for the confidence
 level. Typically 0.95 (i.e., a 95 percent confidence interval).}
+
+\item{tol}{A scalar value for tolerance to be passed to
+\code{stats::optimize()} and \code{stats::uniroot()}.}
 }
 \value{
 A list containing:
   \itemize{
-    \item{\strong{APC}: }{The aerobic plate count point estimate in CFU/ml.}
-    \item{\strong{conf_level}: }{The confidence level used.}
-    \item{\strong{LB}: }{The lower bound of the confidence interval.}
-    \item{\strong{UB}: }{The upper bound of the confidence interval.}
+    \item \strong{APC}: The aerobic plate count point estimate in CFU/ml.
+    \item \strong{conf_level}: The confidence level used.
+    \item \strong{LB}: The lower bound of the confidence interval.
+    \item \strong{UB}: The upper bound of the confidence interval.
   }
 }
 \description{
@@ -104,11 +113,10 @@ apc(my_count, my_amount_scor, my_amount_tntc, my_tntc_limit)
 }
 \references{
 Bacteriological Analytical Manual, 8th Edition, Chapter 3,
-  \url{https://www.fda.gov/food/foodscienceresearch/laboratorymethods/ucm063346.htm}
+  \url{https://www.fda.gov/food/laboratory-methods-food/bam-chapter-3-aerobic-plate-count}
 
 Haas CN, Heller B (1988). "Averaging of TNTC counts."
   \emph{Applied and Environmental Microbiology}, 54(8), 2069-2072.
-  \url{https://aem.asm.org/content/54/8/2069}
 
 Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk
   assessment, Second Ed." \emph{John Wiley & Sons, Inc.},

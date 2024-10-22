@@ -14,13 +14,15 @@
 #'   plate can potentially have a different value. Default is 250.
 #' @param conf_level A scalar value between zero and one for the confidence
 #'   level. Typically 0.95 (i.e., a 95 percent confidence interval).
+#' @param tol A scalar value for tolerance to be passed to
+#'   \code{stats::optimize()} and \code{stats::uniroot()}.
 #'
 #' @return A list containing:
 #'   \itemize{
-#'     \item{\strong{APC}: }{The aerobic plate count point estimate in CFU/ml.}
-#'     \item{\strong{conf_level}: }{The confidence level used.}
-#'     \item{\strong{LB}: }{The lower bound of the confidence interval.}
-#'     \item{\strong{UB}: }{The upper bound of the confidence interval.}
+#'     \item \strong{APC}: The aerobic plate count point estimate in CFU/ml.
+#'     \item \strong{conf_level}: The confidence level used.
+#'     \item \strong{LB}: The lower bound of the confidence interval.
+#'     \item \strong{UB}: The upper bound of the confidence interval.
 #'   }
 #'
 #' @details As an example, assume we start with four plates and 1 ml of
@@ -85,11 +87,10 @@
 #' #Haas & Heller: APC = 13.28 CFU/ml
 #'
 #' @references Bacteriological Analytical Manual, 8th Edition, Chapter 3,
-#'   \url{https://www.fda.gov/food/foodscienceresearch/laboratorymethods/ucm063346.htm}
+#'   \url{https://www.fda.gov/food/laboratory-methods-food/bam-chapter-3-aerobic-plate-count}
 #'
 #' @references Haas CN, Heller B (1988). "Averaging of TNTC counts."
 #'   \emph{Applied and Environmental Microbiology}, 54(8), 2069-2072.
-#'   \url{https://aem.asm.org/content/54/8/2069}
 #'
 #' @references Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk
 #'   assessment, Second Ed." \emph{John Wiley & Sons, Inc.},
@@ -103,18 +104,18 @@
 #' @export
 
 apc <- function(count, amount_scor, amount_tntc = NULL, tntc_limit = 250,
-                conf_level = 0.95) {
+                conf_level = 0.95, tol = 1e-06) {
 
-  .checkInputs_apc(count, amount_scor, amount_tntc, tntc_limit, conf_level)
+  .checkInputs_apc(count, amount_scor, amount_tntc, tntc_limit, conf_level, tol)
 
-  APC <- .ptEst_APC(count, amount_scor, amount_tntc, tntc_limit)
+  APC <- .ptEst_APC(count, amount_scor, amount_tntc, tntc_limit, tol)
 
   like_ratio_CI <- .likeRatioCI_APC(lambda_hat = APC,
                                     count = count,
                                     amount_scor = amount_scor,
                                     amount_tntc = amount_tntc,
                                     tntc_limit = tntc_limit,
-                                    conf_level = conf_level)
+                                    conf_level = conf_level, tol = tol)
   LB <- like_ratio_CI$LB
   UB <- like_ratio_CI$UB
 

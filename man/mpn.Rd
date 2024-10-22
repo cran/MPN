@@ -4,8 +4,14 @@
 \alias{mpn}
 \title{Calculate most probable number (MPN)}
 \usage{
-mpn(positive, tubes, amount, conf_level = 0.95, CI_method = c("Jarvis",
-  "LR"))
+mpn(
+  positive,
+  tubes,
+  amount,
+  conf_level = 0.95,
+  CI_method = c("Jarvis", "LR"),
+  tol = 1e-06
+)
 }
 \arguments{
 \item{positive}{A vector of number of positive tubes at each dilution level.}
@@ -21,28 +27,31 @@ level. Typically 0.95 (i.e., a 95 percent confidence interval).}
 \item{CI_method}{The method used for calculating the confidence interval.
 Choices are \code{"Jarvis"} or \code{"LR"} (likelihood ratio). See
 \emph{Details} section.}
+
+\item{tol}{A scalar value for tolerance to be passed to
+\code{stats::uniroot()}.}
 }
 \value{
 A list containing:
   \itemize{
-    \item{\strong{MPN}: }{The most probable number point estimate for
-      microbial density (concentration).}
-    \item{\strong{MPN_adj}: }{The bias-adjusted point estimate for MPN.}
-    \item{\strong{variance}: }{The estimated variance (see Jarvis et al.) of
+    \item \strong{MPN}: The most probable number point estimate for
+      microbial density (concentration).
+    \item \strong{MPN_adj}: The bias-adjusted point estimate for MPN.
+    \item \strong{variance}: The estimated variance (see Jarvis et al.) of
       the \emph{MPN} estimate if \code{CI_method = "Jarvis"}. If all tubes
       are positive or all negative, \code{variance} will be \code{NA}. If
       \code{CI_method} is not \code{"Jarvis"}, \code{variance} will be
-      \code{NA}.}
-    \item{\strong{var_log}: }{The estimated variance of the natural log of
+      \code{NA}.
+    \item \strong{var_log}: The estimated variance of the natural log of
       the MPN estimate (see Jarvis et al.) using the Delta Method. If all
       tubes are positive or all negative, \code{var_log} will be \code{NA}.
       If \code{CI_method} is not \code{"Jarvis"}, \code{var_log} will be
-      \code{NA}.}
-    \item{\strong{conf_level}: }{The confidence level used.}
-    \item{\strong{CI_method}: }{The confidence interval method used.}
-    \item{\strong{LB}: }{The lower bound of the confidence interval.}
-    \item{\strong{UB}: }{The upper bound of the confidence interval.}
-    \item{\strong{RI}: }{The rarity index.}
+      \code{NA}.
+    \item \strong{conf_level}: The confidence level used.
+    \item \strong{CI_method}: The confidence interval method used.
+    \item \strong{LB}: The lower bound of the confidence interval.
+    \item \strong{UB}: The upper bound of the confidence interval.
+    \item \strong{RI}: The rarity index.
   }
 }
 \description{
@@ -165,20 +174,18 @@ mpn(positive = c(3, 3, 3), tubes = c(3, 3, 3), amount = c(.1, .01, .001),
 }
 \references{
 Bacteriological Analytical Manual, 8th Edition, Appendix 2,
-  \url{https://www.fda.gov/Food/FoodScienceResearch/LaboratoryMethods/ucm109656.htm}
+  \url{https://www.fda.gov/food/laboratory-methods-food/bam-appendix-2-most-probable-number-serial-dilutions}
 
 Blodgett RJ (2002). "Measuring improbability of outcomes from a
   serial dilution test." \emph{Communications in Statistics: Theory and
   Methods}, 31(12), 2209-2223.
-  \url{https://www.tandfonline.com/doi/abs/10.1081/STA-120017222}
 
 Blodgett RJ (2005). "Serial dilution with a confirmation step."
   \emph{Food Microbiology}, 22(6), 547-552.
-  \url{https://doi.org/10.1016/j.fm.2004.11.017}
 
 Blodgett RJ (2010). "Does a serial dilution experiment's model
   agree with its outcome?" \emph{Model Assisted Statistics and Applications},
-  5(3), 209-215. \url{https://doi.org/10.3233/MAS-2010-0157}
+  5(3), 209-215.
 
 Haas CN (1989). "Estimation of microbial densities from dilution
   count experiments" \emph{Applied and Environmental Microbiology} 55(8),
@@ -191,7 +198,7 @@ Haas CN, Rose JB, Gerba CP (2014). "Quantitative microbial risk
 Jarvis B, Wilrich C, Wilrich P-T (2010). "Reconsideration of the
   derivation of Most Probable Numbers, their standard deviations, confidence
   bounds and rarity values." \emph{Journal of Applied Microbiology}, 109,
-  1660-1667. \url{https://doi.org/10.1111/j.1365-2672.2010.04792.x}
+  1660-1667.
 
 Ridout MS (1994). "A comparison of confidence interval methods
   for dilution series experiments." \emph{Biometrics}, 50(1), 289-296.
@@ -201,7 +208,7 @@ Salama IA, Koch GG, Tolley DH. (1978) "On the estimation of the
   in Statistics - Theory and Methods}, 7(13), 1267-1281.
 }
 \seealso{
-Shiny app:  \url{https://mpncalc.galaxytrakr.org/}
+Shiny app:  \url{https://pub-connect.foodsafetyrisk.org/microbial/mpncalc/}
 
 \code{\link{apc}} for Aerobic Plate Count
 }

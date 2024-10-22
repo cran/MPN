@@ -5,7 +5,7 @@
   any(is.na(x) | is.nan(x) | is.infinite(x))
 }
 
-.checkInputs_mpn <- function(positive, tubes, amount, conf_level) {
+.checkInputs_mpn <- function(positive, tubes, amount, conf_level, tol) {
 
   l_positive <- length(positive)
   l_tubes    <- length(tubes)
@@ -37,13 +37,19 @@
   if (conf_level <= 0 || conf_level >= 1) {
     stop("'conf_level' must be between 0 & 1")
   }
+  if (length(tol) != 1) {
+    stop("'tol' must have length of 1")
+  }
+  if (tol <= 0 || tol > 1e-3) {
+    stop("'tol' must be positive and at most 1e-3")
+  }
   if (any(positive > tubes)) {
     stop("more positive tubes than possible")
   }
 }
 
 .checkInputs_apc <- function(count, amount_scor, amount_tntc, tntc_limit,
-                             conf_level) {
+                             conf_level, tol) {
 
   l_count       <- length(count)
   l_amount_scor <- length(amount_scor)
@@ -70,6 +76,12 @@
   }
   if (conf_level <= 0 || conf_level >= 1) {
     stop("'conf_level' must be between 0 & 1")
+  }
+  if (length(tol) != 1) {
+    stop("'tol' must have length of 1")
+  }
+  if (tol <= 0 || tol > 1e-3) {
+    stop("'tol' must be positive and at most 1e-3")
   }
   if (sum(count) == 0 && length(amount_tntc) != 0) {
     stop("if all scorable counts are zero, there should not be any TNTC plates")

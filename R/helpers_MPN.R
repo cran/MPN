@@ -1,6 +1,6 @@
 # Point estimate for MPN -------------------------------------------------------
 
-.ptEst_MPN <- function(positive, tubes, amount) {
+.ptEst_MPN <- function(positive, tubes, amount, tol) {
   # https://www.fda.gov/Food/FoodScienceResearch/LaboratoryMethods/ucm109656.htm
   .scoreFnc <- function(lambda, positive, tubes, amount) {
     #score function: Find root to maximize likelihood.
@@ -19,7 +19,7 @@
   } else {
     MPN <- uniroot(.scoreFnc, interval = c(1e-04, 1e+04),
                    positive = positive, tubes = tubes, amount = amount,
-                   extendInt = "downX", maxiter = 1e+04)$root
+                   extendInt = "downX", tol = tol, maxiter = 1e+04)$root
     return(MPN)
   }
 }
@@ -78,7 +78,7 @@
 
 # Confidence intervals ---------------------------------------------------------
 
-.jarvisCI_MPN <- function(MPN, positive, tubes, amount, conf_level) {
+.jarvisCI_MPN <- function(MPN, positive, tubes, amount, conf_level, tol) {
   # See Jarvis (2010) - "Reconsideration of the derivation of..."
   all_negative <- sum(positive) == 0
   all_positive <- identical(positive, tubes)
@@ -101,7 +101,7 @@
       log(1 / sig_level) + sum(tubes * log(1 - exp(-amount * LB)))
     }
     LB <- uniroot(.fLB, interval = c(1e-02, 1e+03),
-                  extendInt = "upX", maxiter = 1e+04)$root
+                  extendInt = "upX", tol = tol, maxiter = 1e+04)$root
     UB <- Inf
   } else {
     crit_val   <- qnorm(sig_level / 2, lower.tail = FALSE)  #asym. normal
@@ -115,25 +115,26 @@
   list(variance = variance, var_logMPN = var_logMPN, LB = LB, UB = UB)
 }
 
-.likeRatioCI_MPN <- function(MPN, positive, tubes, amount, conf_level) {
+.likeRatioCI_MPN <- function(MPN, positive, tubes, amount, conf_level, tol) {
   #Likelihood ratio confidence limits
   #See Ridout (1994) - "A Comparison of CI Methods..."
   all_negative <- sum(positive) == 0
   all_positive <- identical(positive, tubes)
   crit_val <- qchisq(conf_level, df = 1, lower.tail = TRUE)
   if (all_negative || all_positive) {
-    jarvis_bounds <- .jarvisCI_MPN(MPN, positive, tubes, amount, conf_level)
+    jarvis_bounds <- .jarvisCI_MPN(MPN, positive, tubes, amount, conf_level,
+                                   tol)
     LB <- jarvis_bounds$LB
     UB <- jarvis_bounds$UB
   } else {
     LB <- uniroot(.logLRroot_MPN, interval = c(1e-04, MPN),
                   lambda_hat = MPN, positive = positive, tubes = tubes,
                   amount = amount, crit_val = crit_val,
-                  extendInt  = "no", maxiter = 1e+04)$root
+                  extendInt  = "no", tol = tol, maxiter = 1e+04)$root
     UB <- uniroot(.logLRroot_MPN, interval = c(MPN, 5 * MPN),
                   lambda_hat = MPN, positive = positive, tubes = tubes,
                   amount = amount, crit_val = crit_val,
-                  extendInt  = "upX", maxiter = 1e+04)$root
+                  extendInt  = "upX", tol = tol, maxiter = 1e+04)$root
   }
   list(LB = LB, UB = UB)
 }

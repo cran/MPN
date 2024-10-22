@@ -1,3 +1,15 @@
+MPN v0.4.0
+============
+
+Changes:
+
+* Added a 'tol' argument to mpn() and apc(). This value will be passed to
+stats::uniroot() and stats::optimize(). The default value is lower than
+previously used.
+* Updated URL for the associated shiny app.
+* Minor updates to documentation.
+
+
 MPN v0.3.0
 ============
 

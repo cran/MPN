@@ -23,11 +23,7 @@ and other microbial enumeration metrics derived from serial dilutions.
 
 **MPN** includes the `mpn()` function to estimate the Most Probable Number
 (*MPN*), its variance and confidence interval, and Blodgett's
-(
-[2](https://www.tandfonline.com/doi/abs/10.1081/STA-120017222),
-[3](https://doi.org/10.1016/j.fm.2004.11.017),
-[4](https://doi.org/10.3233/MAS-2010-0157)
-) Rarity Index (*RI*).
+(*2, 3, 4*) Rarity Index (*RI*).
 
 The user inputs the number of dilutions, number of tubes, number of positive
 tubes, amount of inocula, confidence level, and confidence interval method.
@@ -36,12 +32,8 @@ tubes, amount of inocula, confidence level, and confidence interval method.
 ## Maximum Likelihood Estimation
 
 As discussed in the references, *MPN* is estimated by maximizing likelihood.
-Combining the notaton of Blodgett (
-[2](https://www.tandfonline.com/doi/abs/10.1081/STA-120017222)
-)
-and Jarvis et al. (
-[7](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
-), we write the likelihood function as:
+Combining the notaton of Blodgett (*2*) and Jarvis et al. (*7*), we write the
+likelihood function as:
 
 $$L = L(\lambda; x_i, n_i, z_i, i = 1,...,k)
     = \prod_{i=1}^k \binom{n_i}{x_i} {(1-exp(-{\lambda}{z_i}))} ^ {x_i}
@@ -123,7 +115,7 @@ should probably further dilute the sample until some tubes are negative.
 
 
 ## Bias Adjustment
-`mpn()` also returns a bias-adjusted version (*9*, *5*, *6*) of the point
+`mpn()` also returns a bias-adjusted version (*9, 5, 6*) of the point
 estimate:
 
 ```{r Bias adjustment}
@@ -136,10 +128,8 @@ my_mpn$MPN_adj
 
 As discussed in the references, many different confidence intervals (CIs) can be
 calculated for the Most Probable Number. Currently, `mpn()` computes a CI using
-the approach of Jarvis et al.
-(
-[7](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
-) or the likelihood ratio approach of Ridout (*8*).
+the approach of Jarvis et al. (*7*) or the likelihood ratio approach of
+Ridout (*8*).
 However, since these approaches rely on large-sample theory, the results are
 more reliable for larger experiments.
 
@@ -154,15 +144,7 @@ mpn(my_positive, my_tubes, my_amount, CI_method = "LR")  #likelihood ratio
 
 ## Rarity Index
 
-As Jarvis (
-[7](https://doi.org/10.1111/j.1365-2672.2010.04792.x)
-) explains, Blodgett's
-(
-[2](https://www.tandfonline.com/doi/abs/10.1081/STA-120017222),
-[3](https://doi.org/10.1016/j.fm.2004.11.017),
-[4](https://doi.org/10.3233/MAS-2010-0157)
-)
-Rarity Index is a ratio of
+As Jarvis (7) explains, Blodgett's (*2, 3, 4*) Rarity Index is a ratio of
 two likelihoods. The likelihood in the numerator is for the actual results
 (i.e., evaluated at the *MPN* point estimate). The likelihood in the denominator
 is for the (hypothetical) results that would have given the largest possible
@@ -184,20 +166,17 @@ included.
 ### References
 
 1. Bacteriological Analytical Manual, 8th Edition, Appendix 2,
-<https://www.fda.gov/Food/FoodScienceResearch/LaboratoryMethods/ucm109656.htm>
+<https://www.fda.gov/food/laboratory-methods-food/bam-appendix-2-most-probable-number-serial-dilutions>
 
 2. Blodgett RJ (2002). "Measuring improbability of outcomes from a serial
 dilution test." *Communications in Statistics: Theory and Methods*, 31(12),
 2209-2223.
-<https://www.tandfonline.com/doi/abs/10.1081/STA-120017222>
 
 3. Blodgett RJ (2005). "Serial dilution with a confirmation step."
 *Food Microbiology*, 22(6), 547-552.
-<https://doi.org/10.1016/j.fm.2004.11.017>
 
 4. Blodgett RJ (2010). "Does a serial dilution experiment's model agree with its
 outcome?" *Model Assisted Statistics and Applications*, 5(3), 209-215.
-<https://doi.org/10.3233/MAS-2010-0157>
 
 5. Haas CN (1989). "Estimation of microbial densities from dilution
 count experiments" *Applied and Environmental Microbiology* 55(8), 1934-1942.
@@ -208,7 +187,6 @@ Second Ed." *John Wiley & Sons, Inc.*, ISBN 978-1-118-14529-6.
 7. Jarvis B, Wilrich C, Wilrich P-T (2010). "Reconsideration of the derivation
 of Most Probable Numbers, their standard deviations, confidence bounds and
 rarity values." *Journal of Applied Microbiology*, 109, 1660-1667.
-<https://doi.org/10.1111/j.1365-2672.2010.04792.x>
 
 8. Ridout MS (1994). "A Comparison of Confidence Interval Methods for Dilution
 Series Experiments." *Biometrics*, 50(1), 289-296.
